@@ -114,7 +114,7 @@
     <div id="mainAppContent" class="glass-effect shadow-xl rounded-2xl p-4 sm:p-6 md:p-10 w-full max-w-4xl mx-auto border border-indigo-100 hidden">
         <!-- Header -->
         <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-indigo-700 mb-4 sm:mb-6 border-b-2 border-indigo-200 pb-2 sm:pb-4">
-            Income-Expense Tracker
+            EveXa Income-Expense Tracker
         </h1>
 
         <!-- Mobile App-like Banner Section -->
@@ -379,13 +379,19 @@
                         <option value="Other">Other</option>
                         <!-- Custom categories will be appended here by JS -->
                     </select>
-                    <!-- Add custom category input -->
-                    <div class="flex items-center gap-2 mt-2">
-                        <input type="text" id="newCustomCategoryInput" placeholder="Add custom category"
-                               class="flex-grow p-1.5 sm:p-2 rounded-lg border border-indigo-300 focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-sm sm:text-base text-indigo-800 bg-white/60">
-                        <button type="button" id="addCustomCategoryBtn" class="bg-indigo-400 hover:bg-indigo-500 text-white font-semibold py-1.5 px-2.5 sm:py-2 sm:px-3 rounded-lg shadow-sm transition duration-200 ease-in-out text-xs sm:text-sm">
-                            Add
-                        </button>
+
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="font-semibold text-indigo-700 mb-2 text-sm sm:text-base">Manage Custom Categories:</p>
+                        <div class="flex items-center gap-2 mb-3">
+                            <input type="text" id="newCustomCategoryInput" placeholder="Add new category"
+                                   class="flex-grow p-1.5 sm:p-2 rounded-lg border border-indigo-300 focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-sm sm:text-base text-indigo-800 bg-white/60">
+                            <button type="button" id="addCustomCategoryBtn" class="bg-indigo-400 hover:bg-indigo-500 text-white font-semibold py-1.5 px-2.5 sm:py-2 sm:px-3 rounded-lg shadow-sm transition duration-200 ease-in-out text-xs sm:text-sm">
+                                Add
+                            </button>
+                        </div>
+                        <div id="customCategoryList" class="max-h-24 overflow-y-auto space-y-1 pr-1 text-sm">
+                            <!-- Custom categories will be listed here dynamically -->
+                        </div>
                     </div>
                 </div>
                 <div>
@@ -557,6 +563,7 @@
         const entryNote = document.getElementById('entryNote');
         const newCustomCategoryInput = document.getElementById('newCustomCategoryInput');
         const addCustomCategoryBtn = document.getElementById('addCustomCategoryBtn');
+        const customCategoryList = document.getElementById('customCategoryList'); // New element reference
 
         const totalIncomeEl = document.getElementById('totalIncome');
         const totalExpenseEl = document.getElementById('totalExpense');
@@ -828,7 +835,7 @@
 
         /**
          * Populates the detailed category dropdowns (for both new entries and recurring entries)
-         * including predefined and custom categories.
+         * including predefined and custom categories. Also renders the list of custom categories.
          */
         const populateCategoryDropdowns = () => {
             try {
@@ -836,7 +843,7 @@
                 const allCategories = [...defaultCategories, ...customCategories.filter(cat => !defaultCategories.includes(cat))]; // Merge, unique
 
                 const createOptions = (selectElement) => {
-                    selectElement.innerHTML = '<option value="">Select Detailed Category</option>';
+                    selectElement.innerHTML = ''; // Clear existing options
                     // Add "All" option for the filter dropdown specifically
                     if (selectElement.id === 'filterDetailedCategory') {
                         const allOption = document.createElement('option');
@@ -853,6 +860,14 @@
                             selectElement.appendChild(option);
                         });
                     }
+                    // For entry/recurring, ensure "Select Detailed Category" is the first option
+                    if (selectElement.id === 'entryDetailedCategory' || selectElement.id === 'recurringDetailedCategory') {
+                        const defaultOption = document.createElement('option');
+                        defaultOption.value = '';
+                        defaultOption.textContent = 'Select Detailed Category';
+                        selectElement.appendChild(defaultOption);
+                    }
+
                     allCategories.forEach(cat => {
                         const option = document.createElement('option');
                         option.value = cat;
@@ -861,14 +876,47 @@
                     });
                 };
 
+                // Store current selections before repopulating
+                const currentEntryDetailedCategory = entryDetailedCategory.value;
+                const currentRecurringDetailedCategory = recurringDetailedCategory.value;
+                const currentFilterCategory = filterDetailedCategoryEl.value;
+
+                // Populate dropdowns
                 createOptions(entryDetailedCategory);
                 createOptions(recurringDetailedCategory);
-                // Preserve current selection on filter dropdown after repopulating
-                const currentFilterCategory = filterDetailedCategoryEl.value;
                 createOptions(filterDetailedCategoryEl);
-                filterDetailedCategoryEl.value = currentFilterCategory; // Re-set value
+
+                // Restore previous selections
+                entryDetailedCategory.value = currentEntryDetailedCategory;
+                recurringDetailedCategory.value = currentRecurringDetailedCategory;
+                filterDetailedCategoryEl.value = currentFilterCategory;
+
+
+                // --- Render custom category list in modal ---
+                customCategoryList.innerHTML = ''; // Clear existing list items
+                if (customCategories.length === 0) {
+                    customCategoryList.innerHTML = '<p class="text-center text-gray-500 italic">No custom categories added.</p>';
+                } else {
+                    customCategories.forEach(cat => {
+                        const catItem = document.createElement('div');
+                        catItem.className = 'flex items-center justify-between bg-gray-100 rounded-md px-2 py-1 shadow-sm text-gray-700';
+                        catItem.innerHTML = `
+                            <span class="text-sm flex-grow truncate">${cat}</span>
+                            <button type="button" data-category="${cat}" class="remove-custom-category-btn text-red-500 hover:text-red-700 ml-2 text-base p-0.5 rounded-full hover:bg-gray-200 transition-colors" title="Remove category">
+                                &times;
+                            </button>
+                        `;
+                        customCategoryList.appendChild(catItem);
+                    });
+
+                    // Add event listeners to new remove buttons
+                    document.querySelectorAll('.remove-custom-category-btn').forEach(button => {
+                        button.onclick = handleRemoveCustomCategory;
+                    });
+                }
+
             } catch (error) {
-                console.error('Error populating category dropdowns:', error);
+                console.error('Error populating category dropdowns and list:', error);
                 showMessage('Failed to load categories.', 'error');
             }
         };
@@ -897,7 +945,7 @@
                                             (t.type === 'Expense' && t.expenseType === selectedDetailedCategory);
 
                     // Month filtering logic
-                    const transactionMonth = new Date(t.date).toISOString().substring(0, 7); // YYYY-MM
+                    const transactionMonth = new Date(t.date).toISOString().substring(0, 7); //YYYY-MM
                     const matchesMonth = !selectedMonth || transactionMonth === selectedMonth;
 
                     return matchesCategory && matchesMonth;
@@ -1431,7 +1479,7 @@
                     }
                     customCategories.push(newCategory);
                     saveCustomCategories();
-                    populateCategoryDropdowns();
+                    populateCategoryDropdowns(); // Call this to update the list and dropdowns
                     newCustomCategoryInput.value = '';
                     showMessage(`Category "${newCategory}" added!`, 'success');
                 } else {
@@ -1441,6 +1489,50 @@
                 console.error('Error adding custom category:', error);
                 showMessage('Failed to add custom category.', 'error');
             }
+        };
+
+        /**
+         * Handles removing a custom category.
+         * @param {Event} e - The event object from the clicked remove button.
+         */
+        const handleRemoveCustomCategory = (e) => {
+            try {
+                const categoryToRemove = e.target.dataset.category;
+                if (categoryToRemove) {
+                    // Check if any existing transactions use this category before allowing removal
+                    const isCategoryUsedInTransactions = transactions.some(t =>
+                        t.detailedCategory === categoryToRemove || t.category === categoryToRemove // Check both fields just in case
+                    );
+
+                    if (isCategoryUsedInTransactions) {
+                        showCustomConfirm(`Category "${categoryToRemove}" is currently used in some transactions. Removing it might affect your historical data display. Are you sure you want to proceed?`, () => {
+                            performCategoryRemoval(categoryToRemove);
+                        }, () => {
+                            showMessage('Category removal cancelled.', 'info');
+                        });
+                    } else {
+                        // Directly remove if not used in transactions
+                        performCategoryRemoval(categoryToRemove);
+                    }
+                }
+            } catch (error) {
+                console.error('Error initiating custom category removal:', error);
+                showMessage('Failed to remove custom category.', 'error');
+            }
+        };
+
+        /**
+         * Performs the actual removal of a custom category from the array and updates UI.
+         * @param {string} categoryToRemove - The name of the category to remove.
+         */
+        const performCategoryRemoval = (categoryToRemove) => {
+            customCategories = customCategories.filter(cat => cat !== categoryToRemove);
+            saveCustomCategories();
+            populateCategoryDropdowns(); // Re-render dropdowns and list
+            // Re-render transactions to reflect potential changes in category display
+            // (e.g., if a transaction used this category, it might now show 'N/A' or default)
+            updateUI();
+            showMessage(`Category "${categoryToRemove}" removed!`, 'success');
         };
 
         /**
