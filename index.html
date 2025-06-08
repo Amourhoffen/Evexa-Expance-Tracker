@@ -114,7 +114,7 @@
     <div id="mainAppContent" class="glass-effect shadow-xl rounded-2xl p-4 sm:p-6 md:p-10 w-full max-w-4xl mx-auto border border-indigo-100 hidden">
         <!-- Header -->
         <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-indigo-700 mb-4 sm:mb-6 border-b-2 border-indigo-200 pb-2 sm:pb-4">
-            EveXa Income-Expense Tracker
+            Income-Expense Tracker
         </h1>
 
         <!-- Mobile App-like Banner Section -->
@@ -837,6 +837,22 @@
 
                 const createOptions = (selectElement) => {
                     selectElement.innerHTML = '<option value="">Select Detailed Category</option>';
+                    // Add "All" option for the filter dropdown specifically
+                    if (selectElement.id === 'filterDetailedCategory') {
+                        const allOption = document.createElement('option');
+                        allOption.value = 'All';
+                        allOption.textContent = 'All Categories';
+                        selectElement.appendChild(allOption);
+                    }
+                    // Add 'Income', 'Saving', 'Debt' to filter dropdown
+                    if (selectElement.id === 'filterDetailedCategory') {
+                        ['Income', 'Saving', 'Debt'].forEach(specialCat => {
+                            const option = document.createElement('option');
+                            option.value = specialCat;
+                            option.textContent = specialCat;
+                            selectElement.appendChild(option);
+                        });
+                    }
                     allCategories.forEach(cat => {
                         const option = document.createElement('option');
                         option.value = cat;
@@ -847,7 +863,10 @@
 
                 createOptions(entryDetailedCategory);
                 createOptions(recurringDetailedCategory);
-                createOptions(filterDetailedCategoryEl); // Also update filter dropdown
+                // Preserve current selection on filter dropdown after repopulating
+                const currentFilterCategory = filterDetailedCategoryEl.value;
+                createOptions(filterDetailedCategoryEl);
+                filterDetailedCategoryEl.value = currentFilterCategory; // Re-set value
             } catch (error) {
                 console.error('Error populating category dropdowns:', error);
                 showMessage('Failed to load categories.', 'error');
@@ -864,18 +883,29 @@
                 const selectedDetailedCategory = filterDetailedCategoryEl.value;
                 const selectedMonth = filterMonthEl.value; // Format:YYYY-MM
 
+                console.log('--- Debugging renderTransactions ---');
+                console.log('Total transactions in global array:', transactions.length, transactions);
+                console.log('Current Filter: Selected Category:', selectedDetailedCategory, 'Selected Month:', selectedMonth);
+
+
                 // Filter transactions
                 const filteredTransactions = transactions.filter(t => {
+                    // Category filtering logic
                     const matchesCategory = selectedDetailedCategory === 'All' ||
                                             (t.type === 'Income' && selectedDetailedCategory === 'Income') ||
                                             (t.type === 'Expense' && t.detailedCategory === selectedDetailedCategory) ||
-                                            (t.type === 'Expense' && t.expenseType === selectedDetailedCategory); // Allow filtering by expenseType as well
+                                            (t.type === 'Expense' && t.expenseType === selectedDetailedCategory);
 
-                    const transactionMonth = new Date(t.date).toISOString().substring(0, 7); //YYYY-MM
+                    // Month filtering logic
+                    const transactionMonth = new Date(t.date).toISOString().substring(0, 7); // YYYY-MM
                     const matchesMonth = !selectedMonth || transactionMonth === selectedMonth;
 
                     return matchesCategory && matchesMonth;
                 }).sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by date, newest first
+
+                console.log('Filtered transactions count:', filteredTransactions.length);
+                console.log('Filtered transactions (data used for rendering):', filteredTransactions);
+
 
                 if (filteredTransactions.length === 0) {
                     transactionListEl.innerHTML = '<p class="text-center text-indigo-500 italic text-sm text-wrap">No transactions found for the selected filters.</p>';
@@ -883,15 +913,16 @@
                 }
 
                 filteredTransactions.forEach(transaction => {
+                    console.log('Rendering transaction:', transaction); // Log each transaction being rendered
                     let colorClass;
                     let prefix = '';
-                    let displayCategory = transaction.detailedCategory || transaction.category; // Display detailed category if available, otherwise original category
+                    let displayCategory = transaction.detailedCategory || 'N/A'; // Default to N/A if not set
 
                     if (transaction.type === 'Income') {
                         colorClass = 'bg-green-100 border-green-300 text-green-800';
                         prefix = '+';
                         displayCategory = 'Income'; // Ensure "Income" is displayed for income type
-                    } else {
+                    } else { // Expense
                         switch (transaction.expenseType) { // Use expenseType for coloring
                             case 'Need':
                                 colorClass = 'bg-blue-100 border-blue-300 text-blue-800';
@@ -906,9 +937,10 @@
                                 colorClass = 'bg-orange-100 border-orange-300 text-orange-800';
                                 break;
                             default:
-                                colorClass = 'bg-gray-100 border-gray-300 text-gray-800';
+                                colorClass = 'bg-gray-100 border-gray-300 text-gray-800'; // Fallback for undefined expenseType
                         }
                         prefix = '-';
+                        displayCategory = transaction.detailedCategory || 'Expense'; // Fallback for display
                     }
 
                     const transactionEl = document.createElement('div');
@@ -1351,6 +1383,9 @@
 
                 transactions.push(newTransaction);
                 saveTransactions();
+                console.log('--- Debugging handleEntryFormSubmit ---');
+                console.log('New transaction added:', newTransaction);
+                console.log('Transactions array after adding:', transactions);
                 updateUI();
                 hideModal(entryModal, modalContent);
                 showMessage('Entry added successfully!', 'success');
