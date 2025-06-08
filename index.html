@@ -24,6 +24,7 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6; /* Light gray background */
+            overflow: hidden; /* Prevent scrollbar on initial landing page */
         }
         /* Custom scrollbar for better aesthetics */
         ::-webkit-scrollbar {
@@ -91,9 +92,72 @@
         .carousel-item.active {
             display: block; /* Show active item */
         }
+
+        /* Custom Animations for Onboarding */
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fadeInScale {
+            animation: fadeInScale 0.5s ease-out forwards;
+        }
+
+        @keyframes slideInFromTop {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slideInFromTop {
+            animation: slideInFromTop 0.6s ease-out forwards;
+        }
+
+        @keyframes slideInFromBottom {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slideInFromBottom {
+            animation: slideInFromBottom 0.6s ease-out forwards;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        .animate-pulse-btn {
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        /* Background Gradient Animation */
+        body.landing-background {
+            background: linear-gradient(135deg, #A78BFA, #818CF8, #6366F1);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Secure Graphic CSS (SVG for simplicity) */
+        .secure-graphic {
+            width: 120px;
+            height: 120px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            animation: drawLine 2s ease-out forwards, fadeInScale 1s ease-out forwards;
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        @keyframes drawLine {
+            from { stroke-dasharray: 1000; stroke-dashoffset: 1000; }
+            to { stroke-dashoffset: 0; }
+        }
+
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center p-4 sm:p-6 md:p-8">
+<body class="min-h-screen flex flex-col items-center p-4 sm:p-6 md:p-8 landing-background">
 
     <!-- EveXa Loader -->
     <div id="appLoader" class="fixed inset-0 bg-indigo-700 flex flex-col items-center justify-center z-[200] transition-opacity duration-500 ease-out">
@@ -109,12 +173,103 @@
         </div>
     </div>
 
+    <!-- Onboarding Step 1: Welcome Message -->
+    <div id="welcomeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[160] hidden">
+        <div class="modal-glass-effect rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-md text-center transform transition-all duration-300 scale-95 opacity-0" id="welcomeModalContent">
+            <h2 class="text-3xl sm:text-4xl font-bold text-indigo-700 mb-6 animate-slideInFromTop">Welcome to EveXa Aboard!</h2>
+            <div class="mb-6 flex justify-center animate-fadeInScale" style="animation-delay: 0.3s;">
+                <svg class="secure-graphic text-indigo-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM16.29 9.29L11 14.59L7.71 11.29L6.29 12.71L11 17.41L17.71 10.71L16.29 9.29Z" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 6V18M12 18L15 15M12 18L9 15" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <p class="text-gray-800 text-lg sm:text-xl leading-relaxed mb-8 animate-slideInFromBottom" style="animation-delay: 0.5s;">
+                We're delighted to have you join us. Your financial security is our top priority, and we're committed to providing you with a safe and seamless experience.
+            </p>
+            <button id="welcomeNextBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105 text-lg animate-pulse-btn" style="animation-delay: 0.8s;">
+                Next
+            </button>
+        </div>
+    </div>
 
-    <!-- Main Application Container -->
+    <!-- Onboarding Step 2: Generate PIN Prompt -->
+    <div id="generatePinPromptModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[160] hidden">
+        <div class="modal-glass-effect rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-md text-center transform transition-all duration-300 scale-95 opacity-0" id="generatePinPromptModalContent">
+            <h2 class="text-3xl sm:text-4xl font-bold text-indigo-700 mb-6 animate-slideInFromTop">Secure Your Data!</h2>
+            <div class="mb-6 flex justify-center animate-fadeInScale" style="animation-delay: 0.3s;">
+                <svg class="secure-graphic text-purple-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 18C8.68629 18 6 15.3137 6 12C6 8.68629 8.68629 6 12 6C15.3137 6 18 8.68629 18 12C18 15.3137 15.3137 18 12 18Z" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M15 9L9 15M9 9L15 15" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <p class="text-gray-800 text-lg sm:text-xl leading-relaxed mb-8 animate-slideInFromBottom" style="animation-delay: 0.5s;">
+                To unlock your full potential and ensure the safety of your financial data, it's time to set up your personal PIN.
+                <br><br>
+                Go ahead, generate your PIN, and start your lovely life with peace of mind!
+            </p>
+            <button id="generatePinBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105 text-lg animate-pulse-btn" style="animation-delay: 0.8s;">
+                Generate PIN
+            </button>
+        </div>
+    </div>
+
+    <!-- Onboarding Step 3: Disclaimer Modal -->
+    <div id="disclaimerModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-[150] hidden">
+        <div class="modal-glass-effect rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-md transform transition-all duration-300 scale-95 opacity-0" id="disclaimerModalContent">
+            <h2 class="text-2xl sm:text-3xl font-bold text-red-700 mb-4 sm:mb-6 text-center animate-slideInFromTop">Important PIN Information!</h2>
+            <p class="text-gray-800 text-base sm:text-lg leading-relaxed mb-6 animate-fadeInScale" style="animation-delay: 0.3s;">
+                Please remember the 4-digit PIN that you are about to set. This PIN is crucial for accessing your financial data securely.
+                <br><br>
+                <span class="font-bold text-red-600">WARNING: If you forget or change this PIN, all your stored transaction data will be permanently reset and deleted. This action is irreversible.</span>
+                <br><br>
+                By proceeding, you acknowledge and accept these terms.
+            </p>
+            <div class="flex justify-center animate-slideInFromBottom" style="animation-delay: 0.6s;">
+                <button id="agreeToDisclaimerBtn"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105 text-lg">
+                    Agree and Accept
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Onboarding Step 4 / Regular Flow: Privacy Lock Modal -->
+    <div id="privacyLockModal" class="fixed inset-0 bg-indigo-800 bg-opacity-95 flex flex-col items-center justify-center p-4 z-[100] hidden">
+        <div class="modal-glass-effect rounded-2xl shadow-xl p-5 sm:p-6 w-full max-w-sm text-center transform transition-all duration-300 scale-95 opacity-0" id="lockModalContent">
+            <h2 id="lockModalTitle" class="text-2xl sm:text-3xl font-bold text-indigo-700 mb-5 sm:mb-6">🔒 Enter PIN</h2>
+            <div class="mb-5 sm:mb-6">
+                <input type="password" id="pinInput" maxlength="4" placeholder="••••"
+                       class="w-full p-3 sm:p-4 text-center text-3xl sm:text-4xl tracking-[0.5em] rounded-lg border-2 border-indigo-300 focus:ring-4 focus:ring-indigo-400 focus:border-transparent font-mono text-indigo-800 bg-white/60">
+                <p id="pinError" class="text-red-500 text-xs sm:text-sm mt-2 hidden">Invalid PIN. Please try again.</p>
+                <p id="lockoutMessage" class="text-red-600 font-semibold mt-2 hidden text-xs sm:text-sm">Too many failed attempts. Try again in <span id="lockoutTimer"></span> seconds.</p>
+            </div>
+            <div class="flex flex-col gap-2 sm:gap-3">
+                <button id="unlockBtn"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 sm:py-4 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105 text-base sm:text-lg">
+                    Unlock
+                </button>
+                <button id="setNewPinBtn"
+                        class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2.5 sm:py-3 rounded-xl shadow-md transition duration-200 ease-in-out text-sm sm:text-base hidden">
+                    Set New PIN
+                </button>
+                <button id="forgotPinBtn"
+                        class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2.5 sm:py-3 rounded-xl shadow-md transition duration-300 ease-in-out text-sm sm:text-base">
+                    Forgot PIN (Resets All Data)
+                </button>
+                <button id="resetPinBtn"
+                        class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2.5 sm:py-3 rounded-xl shadow-md transition duration-300 ease-in-out text-sm sm:text-base hidden">
+                    Reset All Data (Deletes All & PIN)
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Main Application Content (Hidden until unlocked) -->
     <div id="mainAppContent" class="glass-effect shadow-xl rounded-2xl p-4 sm:p-6 md:p-10 w-full max-w-4xl mx-auto border border-indigo-100 hidden">
         <!-- Header -->
         <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-indigo-700 mb-4 sm:mb-6 border-b-2 border-indigo-200 pb-2 sm:pb-4">
-            EveXa Income-Expense Tracker
+          EveXa  Income-Expense Tracker
         </h1>
 
         <!-- Mobile App-like Banner Section -->
@@ -318,7 +473,6 @@
                     <span class="carousel-dot-brands active w-2 h-2 bg-gray-600 opacity-70 rounded-full cursor-pointer"></span>
                     <span class="carousel-dot-brands w-2 h-2 bg-gray-600 opacity-40 rounded-full cursor-pointer"></span>
                     <span class="carousel-dot-brands w-2 h-2 bg-gray-600 opacity-40 rounded-full cursor-pointer"></span>
-                    <span class="carousel-dot-brands w-2 h-2 bg-gray-600 opacity-40 rounded-full cursor-pointer"></span>
                 </div>
             </div>
         </div>
@@ -504,38 +658,6 @@
     </div>
 
 
-    <!-- Privacy Lock Modal -->
-    <div id="privacyLockModal" class="fixed inset-0 bg-indigo-800 bg-opacity-95 flex flex-col items-center justify-center p-4 z-[100] hidden">
-        <div class="modal-glass-effect rounded-2xl shadow-xl p-5 sm:p-6 w-full max-w-sm text-center transform transition-all duration-300 scale-95 opacity-0" id="lockModalContent">
-            <h2 id="lockModalTitle" class="text-2xl sm:text-3xl font-bold text-indigo-700 mb-5 sm:mb-6">🔒 Enter PIN</h2>
-            <div class="mb-5 sm:mb-6">
-                <input type="password" id="pinInput" maxlength="4" placeholder="••••"
-                       class="w-full p-3 sm:p-4 text-center text-3xl sm:text-4xl tracking-[0.5em] rounded-lg border-2 border-indigo-300 focus:ring-4 focus:ring-indigo-400 focus:border-transparent font-mono text-indigo-800 bg-white/60">
-                <p id="pinError" class="text-red-500 text-xs sm:text-sm mt-2 hidden">Invalid PIN. Please try again.</p>
-                <p id="lockoutMessage" class="text-red-600 font-semibold mt-2 hidden text-xs sm:text-sm">Too many failed attempts. Try again in <span id="lockoutTimer"></span> seconds.</p>
-            </div>
-            <div class="flex flex-col gap-2 sm:gap-3">
-                <button id="unlockBtn"
-                        class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 sm:py-4 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105 text-base sm:text-lg">
-                    Unlock
-                </button>
-                <button id="setNewPinBtn"
-                        class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2.5 sm:py-3 rounded-xl shadow-md transition duration-200 ease-in-out text-sm sm:text-base hidden">
-                    Set New PIN
-                </button>
-                <button id="forgotPinBtn"
-                        class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2.5 sm:py-3 rounded-xl shadow-md transition duration-300 ease-in-out text-sm sm:text-base">
-                    Forgot PIN (Resets All Data)
-                </button>
-                <button id="resetPinBtn"
-                        class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2.5 sm:py-3 rounded-xl shadow-md transition duration-300 ease-in-out text-sm sm:text-base hidden">
-                    Reset All Data (Deletes All & PIN)
-                </button>
-            </div>
-        </div>
-    </div>
-
-
     <!-- Custom Alert/Message Box -->
     <div id="messageBox" class="fixed bottom-4 right-4 bg-green-500 text-white p-3 rounded-lg shadow-xl hidden transition-all duration-300 transform translate-y-full opacity-0 z-50 text-sm">
         <p id="messageText"></p>
@@ -581,7 +703,6 @@
         const feedbackTextEl = document.getElementById('feedbackText');
         const committedNeedsDisplayEl = document.getElementById('committedNeedsDisplay');
         const committedNeedsFeedbackEl = document.getElementById('committedNeedsFeedback');
-        // Corrected line:
         const viewMoreCommittedNeedsBtn = document.getElementById('viewMoreCommittedNeedsBtn');
 
         const messageBox = document.getElementById('messageBox');
@@ -620,6 +741,19 @@
         const forgotPinBtn = document.getElementById('forgotPinBtn'); 
         const lockoutMessage = document.getElementById('lockoutMessage');
         const lockoutTimerDisplay = document.getElementById('lockoutTimer');
+
+        // Disclaimer Modal Elements (Step 3)
+        const disclaimerModal = document.getElementById('disclaimerModal');
+        const disclaimerModalContent = document.getElementById('disclaimerModalContent');
+        const agreeToDisclaimerBtn = document.getElementById('agreeToDisclaimerBtn');
+
+        // New Onboarding Modal Elements (Steps 1 & 2)
+        const welcomeModal = document.getElementById('welcomeModal');
+        const welcomeModalContent = document.getElementById('welcomeModalContent');
+        const welcomeNextBtn = document.getElementById('welcomeNextBtn');
+        const generatePinPromptModal = document.getElementById('generatePinPromptModal');
+        const generatePinPromptModalContent = document.getElementById('generatePinPromptModalContent');
+        const generatePinBtn = document.getElementById('generatePinBtn');
 
         // Savings Goals Elements
         const savingsGoalInput = document.getElementById('savingsGoalInput');
@@ -1976,24 +2110,72 @@
          * Handles the PIN-based privacy lock feature.
          */
         let unlockSessionActive = sessionStorage.getItem('unlockSessionActive') === 'true';
+        let hasAgreedToDisclaimer = localStorage.getItem('hasAgreedToDisclaimer') === 'true'; // New state variable
+        let onboardingComplete = localStorage.getItem('onboardingComplete') === 'true'; // New state variable
 
         /**
-         * Shows the privacy lock modal.
+         * Shows a generic modal with a smooth transition.
+         * @param {HTMLElement} modalElement - The modal wrapper element.
+         * @param {HTMLElement} contentElement - The modal content element for transitions.
+         */
+        const showGenericModal = (modalElement, contentElement) => {
+            modalElement.classList.remove('hidden');
+            // Force reflow to ensure transition plays
+            void contentElement.offsetWidth;
+            contentElement.classList.remove('scale-95', 'opacity-0');
+            contentElement.classList.add('scale-100', 'opacity-100');
+        };
+
+        /**
+         * Hides a generic modal with a smooth transition.
+         * @param {HTMLElement} modalElement - The modal wrapper element.
+         * @param {HTMLElement} contentElement - The modal content element for transitions.
+         */
+        const hideGenericModal = (modalElement, contentElement) => {
+            contentElement.classList.remove('scale-100', 'opacity-100');
+            contentElement.classList.add('scale-95', 'opacity-0');
+            contentElement.addEventListener('transitionend', () => {
+                modalElement.classList.add('hidden');
+            }, { once: true });
+        };
+
+
+        /**
+         * Shows the privacy lock modal (Step 4 / Regular Lock).
          */
         const showLockModal = () => {
             try {
-                if (unlockSessionActive) {
-                    // If already unlocked in session, just ensure main content is visible and initialize app
+                if (unlockSessionActive && onboardingComplete) {
+                    // If already unlocked in session AND onboarding is complete, just ensure main content is visible and initialize app
                     mainAppContent.classList.remove('hidden');
                     initializeApp();
                     return;
                 }
+                
+                // Onboarding flow logic
+                if (!onboardingComplete) {
+                    if (!hasAgreedToDisclaimer) {
+                        // Step 3: Show disclaimer if not agreed
+                        showGenericModal(disclaimerModal, disclaimerModalContent);
+                        return;
+                    }
+                    // If disclaimer agreed, but onboarding not complete, it means we are ready for PIN setup
+                    // This is the first time setting a PIN
+                    lockModalTitle.textContent = '🔑 Set Your PIN';
+                    unlockBtn.textContent = 'Set PIN';
+                    setNewPinBtn.classList.add('hidden'); // Hide set new pin for first time
+                    resetPinBtn.classList.add('hidden'); // Hide reset for first time
+                    forgotPinBtn.classList.add('hidden'); // Hide forgot for first time
+                } else {
+                    // Regular login flow (PIN is already set)
+                    lockModalTitle.textContent = '🔒 Enter PIN';
+                    unlockBtn.textContent = 'Unlock';
+                    setNewPinBtn.classList.remove('hidden');
+                    resetPinBtn.classList.remove('hidden');
+                    forgotPinBtn.classList.remove('hidden'); 
+                }
 
-                privacyLockModal.classList.remove('hidden');
-                setTimeout(() => {
-                    lockModalContent.classList.remove('scale-95', 'opacity-0');
-                    lockModalContent.classList.add('scale-100', 'opacity-100');
-                }, 10);
+                showGenericModal(privacyLockModal, lockModalContent);
                 pinInput.value = '';
                 pinError.classList.add('hidden');
                 pinError.textContent = '';
@@ -2003,20 +2185,6 @@
                     startLockoutCountdown();
                 } else {
                     enablePinInputAndButton();
-                }
-
-                if (storedPIN) {
-                    lockModalTitle.textContent = '🔒 Enter PIN';
-                    unlockBtn.textContent = 'Unlock';
-                    setNewPinBtn.classList.remove('hidden');
-                    resetPinBtn.classList.remove('hidden');
-                    forgotPinBtn.classList.remove('hidden'); 
-                } else {
-                    lockModalTitle.textContent = '🔑 Set Your PIN';
-                    unlockBtn.textContent = 'Set PIN';
-                    setNewPinBtn.classList.add('hidden');
-                    resetPinBtn.classList.add('hidden');
-                    forgotPinBtn.classList.add('hidden'); 
                 }
                 pinInput.focus();
             } catch (error) {
@@ -2030,11 +2198,7 @@
          */
         const hideLockModal = () => {
             try {
-                lockModalContent.classList.remove('scale-100', 'opacity-100');
-                lockModalContent.classList.add('scale-95', 'opacity-0');
-                lockModalContent.addEventListener('transitionend', () => {
-                    privacyLockModal.classList.add('hidden');
-                }, { once: true });
+                hideGenericModal(privacyLockModal, lockModalContent);
             } catch (error) {
                 console.error('Error hiding lock modal:', error);
             }
@@ -2105,12 +2269,13 @@
                     return;
                 }
 
-                if (!storedPIN) { // No PIN set yet, this is for setting the PIN
+                if (!storedPIN) { // No PIN set yet, this is for setting the PIN (Step 4)
                     if (enteredPIN.length === 4 && /^\d+$/.test(enteredPIN)) {
                         savePIN(enteredPIN);
+                        localStorage.setItem('onboardingComplete', 'true'); // Mark onboarding as complete
+                        onboardingComplete = true; // Update in-memory state
                         sessionStorage.setItem('unlockSessionActive', 'true');
                         hideLockModal();
-                        // Directly show main content and initialize app
                         mainAppContent.classList.remove('hidden');
                         initializeApp();
                         showMessage('PIN set successfully!', 'success');
@@ -2121,11 +2286,10 @@
                         pinError.textContent = 'PIN must be 4 digits.';
                         pinError.classList.remove('hidden');
                     }
-                } else { // PIN is already set, this is for unlocking
+                } else { // PIN is already set, this is for unlocking (Regular Flow)
                     if (enteredPIN === storedPIN) {
                         sessionStorage.setItem('unlockSessionActive', 'true');
                         hideLockModal();
-                        // Directly show main content and initialize app
                         mainAppContent.classList.remove('hidden');
                         initializeApp();
                         showMessage('App unlocked!', 'success');
@@ -2152,6 +2316,17 @@
                 showMessage('An error occurred during unlock. Try refreshing.', 'error');
             }
         };
+
+        /**
+         * Handles agreement to the disclaimer (from Step 3).
+         */
+        const handleAgreeToDisclaimer = () => {
+            localStorage.setItem('hasAgreedToDisclaimer', 'true');
+            hasAgreedToDisclaimer = true; // Update in-memory state
+            hideGenericModal(disclaimerModal, disclaimerModalContent);
+            showLockModal(); // Now proceed to PIN setup (Step 4)
+        };
+
 
         /**
          * Prompts the user to set a new PIN, with validation.
@@ -2211,6 +2386,8 @@
                     clearPIN();
                     localStorage.clear(); // Clear all app data
                     sessionStorage.removeItem('unlockSessionActive');
+                    localStorage.removeItem('hasAgreedToDisclaimer'); // Also reset disclaimer flag
+                    localStorage.removeItem('onboardingComplete'); // Reset onboarding flag
                     transactions = [];
                     monthlyBudget = 0;
                     customCategories = [];
@@ -2243,6 +2420,8 @@
                     clearPIN();
                     localStorage.clear();
                     sessionStorage.removeItem('unlockSessionActive');
+                    localStorage.removeItem('hasAgreedToDisclaimer'); // Also reset disclaimer flag
+                    localStorage.removeItem('onboardingComplete'); // Reset onboarding flag
                     transactions = [];
                     monthlyBudget = 0;
                     customCategories = [];
@@ -2580,6 +2759,10 @@
          */
         const initializeApp = () => {
             try {
+                // Ensure the main app content is visible and scrollable now that onboarding is done
+                document.body.style.overflow = 'auto'; // Re-enable scrolling
+                mainAppContent.classList.remove('hidden');
+
                 loadTransactions();
                 loadBudget();
                 loadRecurringTransactions();
@@ -2636,6 +2819,17 @@
         setNewPinBtn.onclick = handleSetNewPin;
         resetPinBtn.onclick = handleResetApp;
         forgotPinBtn.onclick = handleForgotPin;
+        
+        // Onboarding Step Buttons
+        welcomeNextBtn.onclick = () => {
+            hideGenericModal(welcomeModal, welcomeModalContent);
+            showGenericModal(generatePinPromptModal, generatePinPromptModalContent);
+        };
+        generatePinBtn.onclick = () => {
+            hideGenericModal(generatePinPromptModal, generatePinPromptModalContent);
+            showGenericModal(disclaimerModal, disclaimerModalContent);
+        };
+        agreeToDisclaimerBtn.onclick = handleAgreeToDisclaimer; // This now leads to showLockModal (PIN setup)
 
         addCustomCategoryBtn.onclick = handleAddCustomCategory;
         setSavingsGoalBtn.onclick = handleSetSavingsGoal;
@@ -2652,30 +2846,31 @@
          */
         window.onload = () => {
             loadPIN(); // Try to load stored PIN
+            hasAgreedToDisclaimer = localStorage.getItem('hasAgreedToDisclaimer') === 'true'; // Re-load disclaimer status
+            onboardingComplete = localStorage.getItem('onboardingComplete') === 'true'; // Re-load onboarding status
 
-            if (storedPIN) {
-                // If a PIN is set, immediately show the lock modal.
-                // The unlockApp function will handle showing mainAppContent and initializing the app.
-                appLoader.classList.add('hidden'); // Hide loader quickly
-                showLockModal();
-            } else {
-                // If no PIN is set (first run or data cleared),
-                // show loader briefly, then display the main app and the "Set PIN" modal.
-                appLoader.classList.remove('hidden'); // Ensure loader is visible
-                setTimeout(() => {
-                    appLoader.style.opacity = '0'; // Fade out loader
-                    appLoader.addEventListener('transitionend', () => {
-                        appLoader.classList.add('hidden');
-                        mainAppContent.classList.remove('hidden'); // Show main app content
-                        initializeApp(); // Initialize the app AFTER main content is visible
-                        showLockModal(); // Show modal to set PIN
-                    }, { once: true });
-                }, 500); // Loader displays for 0.5 seconds
-            }
-            // Initialize idle timer if already unlocked (e.g., from previous session/tab)
-            if (sessionStorage.getItem('unlockSessionActive') === 'true') {
-                 startIdleTimer();
-            }
+            appLoader.classList.remove('hidden'); // Ensure loader is visible
+
+            setTimeout(() => {
+                appLoader.style.opacity = '0'; // Fade out loader
+                appLoader.addEventListener('transitionend', () => {
+                    appLoader.classList.add('hidden');
+                    // Now, based on PIN and onboarding status, decide what to show
+                    if (onboardingComplete) {
+                        // User has completed onboarding before
+                        mainAppContent.classList.remove('hidden');
+                        initializeApp();
+                        if (!unlockSessionActive) {
+                            showLockModal(); // Go directly to lock screen if not unlocked in session
+                        } else {
+                            startIdleTimer(); // If already unlocked, just start timer
+                        }
+                    } else {
+                        // First-time user, start onboarding flow with welcome modal
+                        showGenericModal(welcomeModal, welcomeModalContent);
+                    }
+                }, { once: true });
+            }, 500); // Loader displays for 0.5 seconds
         };
     </script>
 </body>
