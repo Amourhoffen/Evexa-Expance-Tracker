@@ -176,7 +176,7 @@
     <!-- Onboarding Step 1: Welcome Message -->
     <div id="welcomeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[160] hidden">
         <div class="modal-glass-effect rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-md text-center transform transition-all duration-300 scale-95 opacity-0" id="welcomeModalContent">
-            <h2 class="text-3xl sm:text-4xl font-bold text-indigo-700 mb-6 animate-slideInFromTop">Welcome to EveXa Aboard!</h2>
+            <h2 class="text-3xl sm:text-4xl font-bold text-indigo-700 mb-6 animate-slideInFromTop">Welcome EveXa Aboard!</h2>
             <div class="mb-6 flex justify-center animate-fadeInScale" style="animation-delay: 0.3s;">
                 <svg class="secure-graphic text-indigo-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM16.29 9.29L11 14.59L7.71 11.29L6.29 12.71L11 17.41L17.71 10.71L16.29 9.29Z" stroke-linecap="round" stroke-linejoin="round"/>
@@ -269,7 +269,7 @@
     <div id="mainAppContent" class="glass-effect shadow-xl rounded-2xl p-4 sm:p-6 md:p-10 w-full max-w-4xl mx-auto border border-indigo-100 hidden">
         <!-- Header -->
         <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-indigo-700 mb-4 sm:mb-6 border-b-2 border-indigo-200 pb-2 sm:pb-4">
-          EveXa  Income-Expense Tracker
+            EveXa Income-Expense Tracker
         </h1>
 
         <!-- Mobile App-like Banner Section -->
@@ -848,6 +848,7 @@
             try {
                 localStorage.setItem('appPIN', pin);
                 storedPIN = pin;
+                console.log("[DEBUG PIN] PIN saved:", pin);
             } catch (error) {
                 console.error('Error saving PIN to localStorage:', error);
                 showMessage('Failed to save PIN. Please try again.', 'error');
@@ -857,6 +858,7 @@
         const loadPIN = () => {
             try {
                 storedPIN = localStorage.getItem('appPIN');
+                console.log("[DEBUG PIN] PIN loaded:", storedPIN);
             } catch (error) {
                 console.error('Error loading PIN from localStorage:', error);
                 showMessage('Failed to load PIN. Security features might not work correctly.', 'error');
@@ -867,6 +869,7 @@
             try {
                 localStorage.removeItem('appPIN');
                 storedPIN = null;
+                console.log("[DEBUG PIN] PIN cleared.");
             } catch (error) {
                 console.error('Error clearing PIN from localStorage:', error);
                 showMessage('Failed to clear PIN.', 'error');
@@ -1361,7 +1364,7 @@
                     const wantsPercentage = (currentMonthWants / monthlyBudget) * 100;
 
                     if (wantsPercentage >= 100) {
-                        feedbackEmoji = '😱';
+                        feedbackEmoji = '�';
                         feedbackText = `🚨 Over budget on wants by ₹${(currentMonthWants - monthlyBudget).toLocaleString('en-IN')}!`;
                     } else if (wantsPercentage >= 85) {
                         feedbackEmoji = '😬';
@@ -2145,21 +2148,25 @@
          */
         const showLockModal = () => {
             try {
-                if (unlockSessionActive && onboardingComplete) {
-                    // If already unlocked in session AND onboarding is complete, just ensure main content is visible and initialize app
+                console.log("[DEBUG ONBOARDING] showLockModal called. onboardingComplete:", onboardingComplete, "unlockSessionActive:", unlockSessionActive);
+
+                if (unlockSessionActive && storedPIN) { // Added storedPIN check here for robustness
+                    console.log("[DEBUG ONBOARDING] Session active and PIN exists. Skipping lock modal, showing main content.");
                     mainAppContent.classList.remove('hidden');
                     initializeApp();
                     return;
                 }
                 
                 // Onboarding flow logic
-                if (!onboardingComplete) {
+                if (!storedPIN) { // If NO PIN is stored, it means user is in onboarding or reset app
+                    console.log("[DEBUG ONBOARDING] No stored PIN. User needs to set it.");
                     if (!hasAgreedToDisclaimer) {
+                        console.log("[DEBUG ONBOARDING] Disclaimer not agreed. Showing disclaimer modal.");
                         // Step 3: Show disclaimer if not agreed
                         showGenericModal(disclaimerModal, disclaimerModalContent);
                         return;
                     }
-                    // If disclaimer agreed, but onboarding not complete, it means we are ready for PIN setup
+                    console.log("[DEBUG ONBOARDING] Disclaimer agreed. Ready for PIN setup (first time).");
                     // This is the first time setting a PIN
                     lockModalTitle.textContent = '🔑 Set Your PIN';
                     unlockBtn.textContent = 'Set PIN';
@@ -2167,6 +2174,7 @@
                     resetPinBtn.classList.add('hidden'); // Hide reset for first time
                     forgotPinBtn.classList.add('hidden'); // Hide forgot for first time
                 } else {
+                    console.log("[DEBUG ONBOARDING] Stored PIN found. Regular login flow.");
                     // Regular login flow (PIN is already set)
                     lockModalTitle.textContent = '🔒 Enter PIN';
                     unlockBtn.textContent = 'Unlock';
@@ -2198,6 +2206,7 @@
          */
         const hideLockModal = () => {
             try {
+                console.log("[DEBUG ONBOARDING] Hiding lock modal.");
                 hideGenericModal(privacyLockModal, lockModalContent);
             } catch (error) {
                 console.error('Error hiding lock modal:', error);
@@ -2263,6 +2272,10 @@
                 pinError.classList.add('hidden');
                 pinError.textContent = '';
 
+                console.log("[DEBUG UNLOCK] Attempting unlock. Entered PIN:", enteredPIN, "Stored PIN:", storedPIN);
+                console.log("[DEBUG UNLOCK] Onboarding Complete (before setting):", onboardingComplete);
+
+
                 if (lockoutEndTime > Date.now()) {
                     pinError.textContent = 'Still in lockout period.';
                     pinError.classList.remove('hidden');
@@ -2272,9 +2285,10 @@
                 if (!storedPIN) { // No PIN set yet, this is for setting the PIN (Step 4)
                     if (enteredPIN.length === 4 && /^\d+$/.test(enteredPIN)) {
                         savePIN(enteredPIN);
-                        localStorage.setItem('onboardingComplete', 'true'); // Mark onboarding as complete
+                        localStorage.setItem('onboardingComplete', 'true'); // Mark onboarding as complete (redundant with storedPIN check but good for explicit state)
                         onboardingComplete = true; // Update in-memory state
                         sessionStorage.setItem('unlockSessionActive', 'true');
+                        console.log("[DEBUG UNLOCK] PIN set for the first time. onboardingComplete set to 'true'.");
                         hideLockModal();
                         mainAppContent.classList.remove('hidden');
                         initializeApp();
@@ -2289,12 +2303,13 @@
                 } else { // PIN is already set, this is for unlocking (Regular Flow)
                     if (enteredPIN === storedPIN) {
                         sessionStorage.setItem('unlockSessionActive', 'true');
+                        console.log("[DEBUG UNLOCK] App unlocked successfully with existing PIN.");
                         hideLockModal();
                         mainAppContent.classList.remove('hidden');
                         initializeApp();
                         showMessage('App unlocked!', 'success');
                         failedAttempts = 0;
-                        localStorage.setItem('failedAttempts', failedAttempts);
+                        localStorage.setItem('failedAttempts', failedAttempts); // Fixed typo here
                         startIdleTimer();
                     } else {
                         failedAttempts++;
@@ -2305,9 +2320,11 @@
                             startLockoutCountdown();
                             pinError.textContent = 'Too many failed attempts.';
                             pinError.classList.remove('hidden');
+                            console.warn("[DEBUG UNLOCK] Too many failed attempts. Lockout initiated.");
                         } else {
                             pinError.textContent = `Invalid PIN. ${MAX_FAILED_ATTEMPTS - failedAttempts} attempts remaining.`;
                             pinError.classList.remove('hidden');
+                            console.warn("[DEBUG UNLOCK] Invalid PIN. Attempts remaining:", MAX_FAILED_ATTEMPTS - failedAttempts);
                         }
                     }
                 }
@@ -2323,6 +2340,7 @@
         const handleAgreeToDisclaimer = () => {
             localStorage.setItem('hasAgreedToDisclaimer', 'true');
             hasAgreedToDisclaimer = true; // Update in-memory state
+            console.log("[DEBUG ONBOARDING] Disclaimer agreed. hasAgreedToDisclaimer set to 'true'.");
             hideGenericModal(disclaimerModal, disclaimerModalContent);
             showLockModal(); // Now proceed to PIN setup (Step 4)
         };
@@ -2388,6 +2406,7 @@
                     sessionStorage.removeItem('unlockSessionActive');
                     localStorage.removeItem('hasAgreedToDisclaimer'); // Also reset disclaimer flag
                     localStorage.removeItem('onboardingComplete'); // Reset onboarding flag
+                    console.log("[DEBUG RESET] All data cleared, onboarding and disclaimer flags reset.");
                     transactions = [];
                     monthlyBudget = 0;
                     customCategories = [];
@@ -2422,6 +2441,7 @@
                     sessionStorage.removeItem('unlockSessionActive');
                     localStorage.removeItem('hasAgreedToDisclaimer'); // Also reset disclaimer flag
                     localStorage.removeItem('onboardingComplete'); // Reset onboarding flag
+                    console.log("[DEBUG FORGOT] All data cleared due to forgot PIN, onboarding and disclaimer flags reset.");
                     transactions = [];
                     monthlyBudget = 0;
                     customCategories = [];
@@ -2827,7 +2847,7 @@
         };
         generatePinBtn.onclick = () => {
             hideGenericModal(generatePinPromptModal, generatePinPromptModalContent);
-            showGenericModal(disclaimerModal, disclaimerModalContent);
+            showLockModal(); // This will trigger the disclaimer if not agreed, or PIN setup directly
         };
         agreeToDisclaimerBtn.onclick = handleAgreeToDisclaimer; // This now leads to showLockModal (PIN setup)
 
@@ -2847,7 +2867,15 @@
         window.onload = () => {
             loadPIN(); // Try to load stored PIN
             hasAgreedToDisclaimer = localStorage.getItem('hasAgreedToDisclaimer') === 'true'; // Re-load disclaimer status
-            onboardingComplete = localStorage.getItem('onboardingComplete') === 'true'; // Re-load onboarding status
+            // The onboardingComplete flag is now secondary, storedPIN is primary for determining onboarding status
+            // onboardingComplete = localStorage.getItem('onboardingComplete') === 'true'; // Keeping for debugging, but won't drive primary decision
+
+            console.log("[DEBUG ONBOARDING] Window loaded. Initial states:");
+            console.log("  storedPIN:", storedPIN); // This is the key state
+            console.log("  hasAgreedToDisclaimer:", hasAgreedToDisclaimer);
+            // console.log("  onboardingComplete (from localStorage):", onboardingComplete); // For debugging
+            console.log("  unlockSessionActive (sessionStorage):", unlockSessionActive);
+
 
             appLoader.classList.remove('hidden'); // Ensure loader is visible
 
@@ -2855,18 +2883,21 @@
                 appLoader.style.opacity = '0'; // Fade out loader
                 appLoader.addEventListener('transitionend', () => {
                     appLoader.classList.add('hidden');
-                    // Now, based on PIN and onboarding status, decide what to show
-                    if (onboardingComplete) {
-                        // User has completed onboarding before
-                        mainAppContent.classList.remove('hidden');
-                        initializeApp();
+                    // Check if a PIN is stored. If yes, the user has gone through onboarding (or reset app and is back to PIN).
+                    if (storedPIN) { // <--- THIS IS THE CRITICAL CHANGE: Use storedPIN as primary check
+                        console.log("[DEBUG ONBOARDING] Stored PIN found. User is past initial onboarding steps. Initializing app and showing lock screen if session is not active.");
+                        mainAppContent.classList.remove('hidden'); // Ensure main content is prepared
+                        initializeApp(); // Fully initialize the app
                         if (!unlockSessionActive) {
-                            showLockModal(); // Go directly to lock screen if not unlocked in session
+                            console.log("[DEBUG ONBOARDING] Session not active. Showing lock modal for PIN entry.");
+                            showLockModal(); // Show the lock screen for existing users
                         } else {
-                            startIdleTimer(); // If already unlocked, just start timer
+                            console.log("[DEBUG ONBOARDING] Session active. Skipping lock modal. Starting idle timer.");
+                            startIdleTimer(); // App is already unlocked from a previous action in this session
                         }
                     } else {
-                        // First-time user, start onboarding flow with welcome modal
+                        // No PIN stored. User is genuinely new or explicitly reset the app. Start full onboarding flow.
+                        console.log("[DEBUG ONBOARDING] No stored PIN. User needs to complete onboarding. Showing welcome modal.");
                         showGenericModal(welcomeModal, welcomeModalContent);
                     }
                 }, { once: true });
