@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EveXa Income-Expense Tracker - Your Personal Finance Manager</title>
     <!-- SEO Meta Tags -->
-    <meta name="description" content="EveXa Income-Expense Tracker: Smartly manage your income, track expenses (needs vs. wants), set personalized budgets, schedule recurring bills, and export financial reports. Achieve your financial goals with EveXa!">
-    <meta name="keywords" content="income tracker, expense tracker, budget app, personal finance, money management, needs wants, recurring bills, financial planner, savings tracker, custom categories, financial goals, EveXa, free finance app">
-    <meta name="author" content="EveXa Solutions">
+    <meta name="description" content="EveXa Income-Expense Tracker, by EveXa Buddy: Smartly manage your income, track expenses (needs vs. wants), set personalized budgets, schedule recurring bills, and export financial reports. Achieve your financial goals with EveXa! Best budgeting app for students and beginners.">
+    <meta name="keywords" content="income tracker, expense tracker, budget app, personal finance, money management, needs wants, recurring bills, financial planner, savings tracker, custom categories, financial goals, EveXa, free finance app, student budget, beginner finance, EveXa Buddy">
+    <meta name="author" content="EveXa Buddy">
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#4F46E5"> <!-- Primary color for browser theme -->
 
@@ -155,6 +155,14 @@
             to { stroke-dashoffset: 0; }
         }
 
+        /* Progress Bar Animation for Savings Goal */
+        @keyframes progressBarFill {
+            from { width: 0%; }
+        }
+        .animate-progressBarFill {
+            animation: progressBarFill 1s ease-out forwards;
+        }
+
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4 sm:p-6 md:p-8 landing-background">
@@ -176,7 +184,7 @@
     <!-- Onboarding Step 1: Welcome Message -->
     <div id="welcomeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[160] hidden">
         <div class="modal-glass-effect rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-md text-center transform transition-all duration-300 scale-95 opacity-0" id="welcomeModalContent">
-            <h2 class="text-3xl sm:text-4xl font-bold text-indigo-700 mb-6 animate-slideInFromTop">Welcome EveXa Aboard!</h2>
+            <h2 class="text-3xl sm:text-4xl font-bold text-indigo-700 mb-6 animate-slideInFromTop">Welcome Aboard!</h2>
             <div class="mb-6 flex justify-center animate-fadeInScale" style="animation-delay: 0.3s;">
                 <svg class="secure-graphic text-indigo-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM16.29 9.29L11 14.59L7.71 11.29L6.29 12.71L11 17.41L17.71 10.71L16.29 9.29Z" stroke-linecap="round" stroke-linejoin="round"/>
@@ -220,7 +228,7 @@
             <p class="text-gray-800 text-base sm:text-lg leading-relaxed mb-6 animate-fadeInScale" style="animation-delay: 0.3s;">
                 Please remember the 4-digit PIN that you are about to set. This PIN is crucial for accessing your financial data securely.
                 <br><br>
-                <span class="font-bold text-red-600">WARNING: If you forget or change this PIN, all your stored transaction data will be permanently reset and deleted. This action is irreversible.</span>
+                <span class="font-bold text-red-600">WARNING: If you forget or change this PIN, and have not set up security questions, all your stored transaction data will be permanently reset and deleted. This action is irreversible.</span>
                 <br><br>
                 By proceeding, you acknowledge and accept these terms.
             </p>
@@ -233,7 +241,84 @@
         </div>
     </div>
 
-    <!-- Onboarding Step 4 / Regular Flow: Privacy Lock Modal -->
+    <!-- New Security Questions Modal (Onboarding Step 4) -->
+    <div id="setSecurityQuestionsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[155] hidden">
+        <div class="modal-glass-effect rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-md text-center transform transition-all duration-300 scale-95 opacity-0" id="setSecurityQuestionsModalContent">
+            <h2 class="text-2xl sm:text-3xl font-bold text-indigo-700 mb-6">Set Up Your Security Questions</h2>
+            <p class="text-gray-700 text-base sm:text-lg mb-6">These questions will help you recover your PIN if you ever forget it. Make sure your answers are easy for YOU to remember, but hard for others to guess!</p>
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label for="nicknameInput" class="block text-indigo-700 font-semibold mb-2 text-sm sm:text-base text-left">What's your childhood nickname?</label>
+                    <input type="text" id="nicknameInput" placeholder="e.g., Tiger, Buddy"
+                           class="w-full p-2 sm:p-3 rounded-lg border border-indigo-300 focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-base sm:text-lg text-indigo-800 bg-white/60">
+                </div>
+                <div>
+                    <label for="petNameInput" class="block text-indigo-700 font-semibold mb-2 text-sm sm:text-base text-left">What's your first pet's name?</label>
+                    <input type="text" id="petNameInput" placeholder="e.g., Whiskers, Charlie"
+                           class="w-full p-2 sm:p-3 rounded-lg border border-indigo-300 focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-base sm:text-lg text-indigo-800 bg-white/60">
+                </div>
+                <p id="securityQuestionsError" class="text-red-500 text-sm hidden"></p>
+            </div>
+            <button id="saveSecurityQuestionsBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105 text-lg">
+                Save & Continue
+            </button>
+        </div>
+    </div>
+
+    <!-- Custom Security Questions Prompt Modal (For forgot PIN flow - Step 5a) -->
+    <div id="securityQuestionsPromptModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[160] hidden">
+        <div class="modal-glass-effect rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-md text-center transform transition-all duration-300 scale-95 opacity-0" id="securityQuestionsPromptModalContent">
+            <h2 class="text-2xl sm:text-3xl font-bold text-indigo-700 mb-6">Verify Your Identity</h2>
+            <p class="text-gray-700 text-base sm:text-lg mb-6">Please answer your security questions to set a new PIN.</p>
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label for="recoveryNicknameInput" class="block text-indigo-700 font-semibold mb-2 text-sm sm:text-base text-left">What's your childhood nickname?</label>
+                    <input type="text" id="recoveryNicknameInput" placeholder="Enter your nickname"
+                           class="w-full p-2 sm:p-3 rounded-lg border border-indigo-300 focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-base sm:text-lg text-indigo-800 bg-white/60">
+                </div>
+                <div>
+                    <label for="recoveryPetNameInput" class="block text-indigo-700 font-semibold mb-2 text-sm sm:text-base text-left">What's your first pet's name?</label>
+                    <input type="text" id="recoveryPetNameInput" placeholder="Enter your pet's name"
+                           class="w-full p-2 sm:p-3 rounded-lg border border-indigo-300 focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-base sm:text-lg text-indigo-800 bg-white/60">
+                </div>
+                <p id="recoveryError" class="text-red-500 text-sm hidden"></p>
+            </div>
+            <div class="flex justify-center gap-4">
+                <button id="submitRecoveryAnswersBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105 text-lg">
+                    Submit
+                </button>
+                <button id="cancelRecoveryBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200 ease-in-out text-lg">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New PIN Recovery Modal (After answering security questions correctly - Step 5b) -->
+    <div id="newPinRecoveryModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[160] hidden">
+        <div class="modal-glass-effect rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-md text-center transform transition-all duration-300 scale-95 opacity-0" id="newPinRecoveryModalContent">
+            <h2 class="text-2xl sm:text-3xl font-bold text-indigo-700 mb-6">Set New PIN</h2>
+            <p class="text-gray-700 text-base sm:text-lg mb-6">Enter a new 4-digit PIN. Make sure to remember it!</p>
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label for="newPinInputRecovery" class="block text-indigo-700 font-semibold mb-2 text-sm sm:text-base text-left">New PIN:</label>
+                    <input type="password" id="newPinInputRecovery" maxlength="4" placeholder="••••"
+                           class="w-full p-2 sm:p-3 rounded-lg border border-indigo-300 focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-base sm:text-lg text-indigo-800 bg-white/60">
+                </div>
+                <div>
+                    <label for="confirmNewPinInputRecovery" class="block text-indigo-700 font-semibold mb-2 text-sm sm:text-base text-left">Confirm New PIN:</label>
+                    <input type="password" id="confirmNewPinInputRecovery" maxlength="4" placeholder="••••"
+                           class="w-full p-2 sm:p-3 rounded-lg border border-indigo-300 focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-base sm:text-lg text-indigo-800 bg-white/60">
+                </div>
+                <p id="newPinRecoveryError" class="text-red-500 text-sm hidden"></p>
+            </div>
+            <button id="saveNewPinRecoveryBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105 text-lg">
+                Set New PIN
+            </button>
+        </div>
+    </div>
+
+    <!-- Main PIN Lock/Unlock Modal (Step 5 / Regular Flow) -->
     <div id="privacyLockModal" class="fixed inset-0 bg-indigo-800 bg-opacity-95 flex flex-col items-center justify-center p-4 z-[100] hidden">
         <div class="modal-glass-effect rounded-2xl shadow-xl p-5 sm:p-6 w-full max-w-sm text-center transform transition-all duration-300 scale-95 opacity-0" id="lockModalContent">
             <h2 id="lockModalTitle" class="text-2xl sm:text-3xl font-bold text-indigo-700 mb-5 sm:mb-6">🔒 Enter PIN</h2>
@@ -254,10 +339,10 @@
                 </button>
                 <button id="forgotPinBtn"
                         class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2.5 sm:py-3 rounded-xl shadow-md transition duration-300 ease-in-out text-sm sm:text-base">
-                    Forgot PIN (Resets All Data)
+                    Forgot PIN
                 </button>
-                <button id="resetPinBtn"
-                        class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2.5 sm:py-3 rounded-xl shadow-md transition duration-300 ease-in-out text-sm sm:text-base hidden">
+                <button id="resetAllDataBtn"
+                        class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2.5 sm:py-3 rounded-xl shadow-md transition duration-300 ease-in-out text-sm sm:text-base">
                     Reset All Data (Deletes All & PIN)
                 </button>
             </div>
@@ -318,7 +403,7 @@
             <div class="flex flex-col md:flex-row items-center gap-4">
                 <div class="flex-grow w-full">
                     <label for="savingsGoalInput" class="block text-green-700 font-semibold mb-2 text-sm sm:text-base">Set Your Goal Amount (₹):</label>
-                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2"> <!-- Added flex-col and flex-wrap for mobile responsiveness -->
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                         <div class="flex items-center w-full sm:w-auto flex-grow">
                             <span class="text-green-600 text-lg sm:text-xl font-bold flex-shrink-0 mr-1">₹</span>
                             <input type="number" id="savingsGoalInput" placeholder="e.g., 100000"
@@ -339,11 +424,11 @@
             </div>
         </div>
 
-        <!-- Committed Needs Section -->
+        <!-- Scheduled Bills & Subscriptions Section -->
         <div class="section-glass-effect p-4 sm:p-6 rounded-xl shadow-inner mb-6 sm:mb-8 flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4 border border-blue-200">
             <div class="flex-grow text-center md:text-left">
                 <p class="text-base sm:text-lg font-semibold mb-1 flex items-center justify-center md:justify-start">
-                    <span class="mr-2 text-xl">💸</span> Committed Needs this month:
+                    <span class="mr-2 text-xl">🗓️</span> Scheduled Bills & Subscriptions this month:
                 </p>
                 <p id="committedNeedsDisplay" class="text-2xl sm:text-3xl font-bold text-blue-800">₹0.00</p>
             </div>
@@ -352,7 +437,7 @@
                     (Includes recurring payments like EMI, loans, and rent for this month.)
                 </p>
                 <button id="viewMoreCommittedNeedsBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200 ease-in-out text-sm sm:text-base">
-                    View More
+                    View Details
                 </button>
             </div>
         </div>
@@ -361,7 +446,7 @@
         <div class="section-glass-effect p-4 sm:p-6 rounded-xl shadow-inner mb-6 sm:mb-8 flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
             <div class="flex-grow w-full">
                 <label for="monthlyBudget" class="block text-indigo-700 text-base sm:text-lg font-semibold mb-2">Monthly Budget (Wants):</label>
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2"> <!-- Added flex-col for responsiveness -->
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                     <div class="flex items-center w-full sm:w-auto flex-grow">
                         <span class="text-indigo-600 text-lg sm:text-xl font-bold flex-shrink-0 mr-1">₹</span>
                         <input type="number" id="monthlyBudget" placeholder="e.g., 5000"
@@ -382,17 +467,17 @@
         <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
             <button id="addEntryBtn"
                     class="w-full sm:w-1/2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105 text-lg sm:text-xl">
-                ➕ Add New Entry
+                📝 Record Income/Expense
             </button>
             <button id="addRecurringEntryBtn"
                     class="w-full sm:w-1/2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105 text-lg sm:text-xl">
-                🔄 Add Recurring Entry
+                🔄 Schedule Recurring Entry
             </button>
         </div>
 
         <!-- Scheduled Entries Section (Now on main page) -->
         <div class="section-glass-effect p-4 sm:p-6 rounded-xl shadow-inner border border-purple-200 mb-6 sm:mb-8">
-            <h2 class="text-xl sm:text-2xl font-semibold text-purple-700 mb-3 sm:mb-4 border-b border-purple-200 pb-1 sm:pb-2 text-center">All Scheduled Entries</h2>
+            <h2 class="text-xl sm:text-2xl font-semibold text-purple-700 mb-3 sm:mb-4 border-b border-purple-200 pb-1 sm:pb-2 text-center">Your Scheduled Entries</h2>
             <div id="recurringList" class="space-y-3 max-h-80 overflow-y-auto pr-2">
                 <p class="text-center text-purple-500 italic text-sm">No recurring entries scheduled.</p>
             </div>
@@ -444,7 +529,7 @@
             <!-- Visual Needs vs Wants Chart -->
             <div class="section-glass-effect p-4 sm:p-6 rounded-xl shadow-inner border border-indigo-200 flex flex-col items-center justify-center">
                 <h2 class="text-xl sm:text-2xl font-semibold text-indigo-700 mb-3 sm:mb-4 border-b border-indigo-200 pb-1 sm:pb-2 w-full text-center">Spending Breakdown</h2>
-                <div class="relative w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto aspect-square"> <!-- Adjusted max-width for mobile chart -->
+                <div class="relative w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto aspect-square">
                     <canvas id="spendingChart"></canvas>
                 </div>
                 <p id="chartStatus" class="text-center text-indigo-500 italic mt-3 sm:mt-4 text-sm text-wrap">Add expenses to see the chart.</p>
@@ -453,20 +538,20 @@
 
         <!-- Trusted Badges Carousel (Advanced Feature) -->
         <div class="section-glass-effect p-4 sm:p-6 rounded-xl shadow-inner border border-blue-200 mt-6 sm:mt-8 mb-6 sm:mb-8">
-            <h2 class="text-xl sm:text-2xl font-semibold text-blue-700 mb-3 sm:mb-4 border-b border-blue-200 pb-1 sm:pb-2 text-center">Trusted Badges</h2>
-            <div id="trustedBrandsCarousel" class="relative w-full overflow-hidden h-14 flex items-center justify-center"> <!-- Further reduced height -->
+            <h2 class="text-xl sm:text-2xl font-semibold text-blue-700 mb-3 sm:mb-4 border-b border-blue-200 pb-1 sm:pb-2 text-center">Trusted Badges by EveXa Buddy</h2>
+            <div id="trustedBrandsCarousel" class="relative w-full overflow-hidden h-14 flex items-center justify-center">
                 <div class="carousel-inner h-full flex transition-transform duration-500 ease-in-out">
                     <div class="carousel-item active w-full flex-shrink-0 flex items-center justify-center">
-                        <div class="bg-green-500 text-white px-3 py-1.5 rounded-lg shadow-md text-sm font-bold glass-effect">Verified ✅</div> <!-- Further smaller padding, text -->
+                        <div class="bg-green-500 text-white px-3 py-1.5 rounded-lg shadow-md text-sm font-bold glass-effect">Verified ✅</div>
                     </div>
                     <div class="carousel-item w-full flex-shrink-0 flex items-center justify-center">
-                        <div class="bg-blue-500 text-white px-3 py-1.5 rounded-lg shadow-md text-sm font-bold glass-effect">Secure 🔒</div> <!-- Further smaller padding, text -->
+                        <div class="bg-blue-500 text-white px-3 py-1.5 rounded-lg shadow-md text-sm font-bold glass-effect">Secure 🔒</div>
                     </div>
                     <div class="carousel-item w-full flex-shrink-0 flex items-center justify-center">
-                        <div class="bg-yellow-500 text-white px-3 py-1.5 rounded-lg shadow-md text-sm font-bold glass-effect">Certified ⭐</div> <!-- Further smaller padding, text -->
+                        <div class="bg-yellow-500 text-white px-3 py-1.5 rounded-lg shadow-md text-sm font-bold glass-effect">Certified ⭐</div>
                     </div>
                     <div class="carousel-item w-full flex-shrink-0 flex items-center justify-center">
-                        <div class="bg-purple-500 text-white px-3 py-1.5 rounded-lg shadow-md text-sm font-bold glass-effect">Private 🛡️</div> <!-- Further smaller padding, text -->
+                        <div class="bg-purple-500 text-white px-3 py-1.5 rounded-lg shadow-md text-sm font-bold glass-effect">Private 🛡️</div>
                     </div>
                 </div>
                 <div class="absolute bottom-0 left-0 right-0 flex justify-center space-x-2">
@@ -491,10 +576,10 @@
     <!-- Add Entry Modal -->
     <div id="entryModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
         <div class="modal-glass-effect rounded-2xl shadow-xl p-4 sm:p-6 w-full max-w-lg transform transition-all duration-300 scale-95 opacity-0" id="modalContent">
-            <h2 class="text-xl sm:text-2xl font-bold text-indigo-700 mb-4 sm:mb-6 border-b border-indigo-200 pb-2 sm:pb-3">Add New Entry</h2>
+            <h2 class="text-xl sm:text-2xl font-bold text-indigo-700 mb-4 sm:mb-6 border-b border-indigo-200 pb-2 sm:pb-3">Record New Entry</h2>
             <form id="entryForm" class="space-y-3 sm:space-y-4">
                 <div>
-                    <label for="entryType" class="block text-indigo-700 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Type:</label>
+                    <label for="entryType" class="block text-indigo-700 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Entry Type:</label>
                     <select id="entryType" class="w-full p-2 sm:p-3 rounded-lg border border-indigo-300 focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-base sm:text-lg text-indigo-800 bg-white/60">
                         <option value="Expense">Expense</option>
                         <option value="Income">Income</option>
@@ -506,21 +591,21 @@
                            class="w-full p-2 sm:p-3 rounded-lg border border-indigo-300 focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-base sm:text-lg text-indigo-800 bg-white/60">
                 </div>
                 <div id="expenseCategoryGroup">
-                    <label for="entryExpenseType" class="block text-indigo-700 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Expense Type:</label>
+                    <label for="entryExpenseType" class="block text-indigo-700 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Expense Classification:</label>
                     <select id="entryExpenseType"
                             class="w-full p-2 sm:p-3 rounded-lg border border-indigo-300 focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-base sm:text-lg text-indigo-800 bg-white/60">
                         <option value="">Select Expense Type</option>
-                        <option value="Need">Need</option>
-                        <option value="Want">Want</option>
-                        <option value="Saving">Saving</option>
-                        <option value="Debt">Debt</option>
+                        <option value="Need">Need (Essentials)</option>
+                        <option value="Want">Want (Non-Essentials)</option>
+                        <option value="Saving">Saving (Contribution to Goal)</option>
+                        <option value="Debt">Debt (Loan Payments)</option>
                     </select>
                 </div>
                 <div id="detailedCategoryGroup">
-                    <label for="entryDetailedCategory" class="block text-indigo-700 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Detailed Category:</label>
+                    <label for="entryDetailedCategory" class="block text-indigo-700 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Category:</label>
                     <select id="entryDetailedCategory"
                             class="w-full p-2 sm:p-3 rounded-lg border border-indigo-300 focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-base sm:text-lg text-indigo-800 bg-white/60">
-                        <option value="">Select Detailed Category</option>
+                        <option value="">Select Category</option>
                         <option value="Food">Food</option>
                         <option value="Travel">Travel</option>
                         <option value="Utilities">Utilities</option>
@@ -554,7 +639,7 @@
                            class="w-full p-2 sm:p-3 rounded-lg border border-indigo-300 focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-base sm:text-lg text-indigo-800 bg-white/60">
                 </div>
                 <div>
-                    <label for="entryNote" class="block text-indigo-700 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Note (Optional):</label>
+                    <label for="entryNote" class="block text-indigo-700 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Description (Optional):</label>
                     <textarea id="entryNote" rows="3" placeholder="e.g., Groceries for the week"
                               class="w-full p-2 sm:p-3 rounded-lg border border-indigo-300 focus:ring-2 focus:ring-indigo-400 focus:border-transparent text-base sm:text-lg text-indigo-800 bg-white/60"></textarea>
                 </div>
@@ -583,10 +668,10 @@
                            class="w-full p-2 sm:p-3 rounded-lg border border-purple-300 focus:ring-2 focus:ring-purple-400 focus:border-transparent text-base sm:text-lg text-purple-800 bg-white/60">
                 </div>
                 <div>
-                    <label for="recurringDetailedCategory" class="block text-purple-700 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Detailed Category:</label>
+                    <label for="recurringDetailedCategory" class="block text-purple-700 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Category:</label>
                     <select id="recurringDetailedCategory" required
                             class="w-full p-2 sm:p-3 rounded-lg border border-purple-300 focus:ring-2 focus:ring-purple-400 focus:border-transparent text-base sm:text-lg text-purple-800 bg-white/60">
-                        <option value="">Select Detailed Category</option>
+                        <option value="">Select Category</option>
                         <option value="Food">Food</option>
                         <option value="Travel">Travel</option>
                         <option value="Utilities">Utilities</option>
@@ -601,12 +686,12 @@
                     </select>
                 </div>
                 <div>
-                    <label for="recurringExpenseType" class="block text-purple-700 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Expense Type:</label>
+                    <label for="recurringExpenseType" class="block text-purple-700 font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Classification:</label>
                     <select id="recurringExpenseType" required
                             class="w-full p-2 sm:p-3 rounded-lg border border-purple-300 focus:ring-2 focus:ring-purple-400 focus:border-transparent text-base sm:text-lg text-purple-800 bg-white/60">
-                        <option value="">Select Expense Type</option>
-                        <option value="Need">Need</option>
-                        <option value="Want">Want</option>
+                        <option value="">Select Classification</option>
+                        <option value="Need">Need (Essentials)</option>
+                        <option value="Want">Want (Non-Essentials)</option>
                     </select>
                 </div>
                 <div>
@@ -637,13 +722,13 @@
         </div>
     </div>
 
-    <!-- Committed Needs Detail Modal -->
+    <!-- Scheduled Bills Details Modal -->
     <div id="committedNeedsDetailModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
         <div class="modal-glass-effect rounded-2xl shadow-xl p-4 sm:p-6 w-full max-w-lg transform transition-all duration-300 scale-95 opacity-0" id="committedNeedsDetailModalContent">
-            <h2 class="text-xl sm:text-2xl font-bold text-blue-700 mb-4 sm:mb-6 border-b border-blue-200 pb-2 sm:pb-3">Committed Needs This Month</h2>
+            <h2 class="text-xl sm:text-2xl font-bold text-blue-700 mb-4 sm:mb-6 border-b border-blue-200 pb-2 sm:pb-3">Scheduled Bills & Subscriptions This Month</h2>
             <div id="committedNeedsDetailList" class="space-y-2 max-h-80 overflow-y-auto pr-2">
                 <!-- Committed needs details will be loaded here -->
-                <p class="text-center text-blue-500 italic text-sm">No committed needs scheduled for this month.</p>
+                <p class="text-center text-blue-500 italic text-sm">No scheduled bills for this month.</p>
             </div>
             <div class="flex justify-end gap-2 sm:gap-3 pt-3 sm:pt-4">
                 <button type="button" id="undoLastPaidBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg shadow-md transition duration-200 ease-in-out text-sm sm:text-base hidden">
@@ -722,7 +807,7 @@
         const recurrenceInterval = document.getElementById('recurrenceInterval');
         const recurringListEl = document.getElementById('recurringList');
 
-        // Committed Needs Detail Modal Elements
+        // Committed Needs Detail Modal Elements (Renamed to Scheduled Bills Details Modal)
         const committedNeedsDetailModal = document.getElementById('committedNeedsDetailModal');
         const committedNeedsDetailModalContent = document.getElementById('committedNeedsDetailModalContent');
         const committedNeedsDetailList = document.getElementById('committedNeedsDetailList');
@@ -737,8 +822,8 @@
         const pinError = document.getElementById('pinError');
         const unlockBtn = document.getElementById('unlockBtn');
         const setNewPinBtn = document.getElementById('setNewPinBtn');
-        const resetPinBtn = document.getElementById('resetPinBtn');
-        const forgotPinBtn = document.getElementById('forgotPinBtn'); 
+        const resetAllDataBtn = document.getElementById('resetAllDataBtn'); // Renamed from resetPinBtn
+        const forgotPinBtn = document.getElementById('forgotPinBtn');
         const lockoutMessage = document.getElementById('lockoutMessage');
         const lockoutTimerDisplay = document.getElementById('lockoutTimer');
 
@@ -755,6 +840,31 @@
         const generatePinPromptModalContent = document.getElementById('generatePinPromptModalContent');
         const generatePinBtn = document.getElementById('generatePinBtn');
 
+        // New Security Questions Modals & Elements (Onboarding Step 4)
+        const setSecurityQuestionsModal = document.getElementById('setSecurityQuestionsModal');
+        const setSecurityQuestionsModalContent = document.getElementById('setSecurityQuestionsModalContent');
+        const nicknameInput = document.getElementById('nicknameInput');
+        const petNameInput = document.getElementById('petNameInput');
+        const saveSecurityQuestionsBtn = document.getElementById('saveSecurityQuestionsBtn');
+        const securityQuestionsError = document.getElementById('securityQuestionsError');
+
+        // PIN Recovery Modals & Elements (Step 5a & 5b)
+        const securityQuestionsPromptModal = document.getElementById('securityQuestionsPromptModal');
+        const securityQuestionsPromptModalContent = document.getElementById('securityQuestionsPromptModalContent');
+        const recoveryNicknameInput = document.getElementById('recoveryNicknameInput');
+        const recoveryPetNameInput = document.getElementById('recoveryPetNameInput');
+        const submitRecoveryAnswersBtn = document.getElementById('submitRecoveryAnswersBtn');
+        const recoveryError = document.getElementById('recoveryError');
+        const cancelRecoveryBtn = document.getElementById('cancelRecoveryBtn');
+
+        const newPinRecoveryModal = document.getElementById('newPinRecoveryModal');
+        const newPinRecoveryModalContent = document.getElementById('newPinRecoveryModalContent');
+        const newPinInputRecovery = document.getElementById('newPinInputRecovery');
+        const confirmNewPinInputRecovery = document.getElementById('confirmNewPinInputRecovery');
+        const saveNewPinRecoveryBtn = document.getElementById('saveNewPinRecoveryBtn');
+        const newPinRecoveryError = document.getElementById('newPinRecoveryError');
+
+
         // Savings Goals Elements
         const savingsGoalInput = document.getElementById('savingsGoalInput');
         const setSavingsGoalBtn = document.getElementById('setSavingsGoalBtn');
@@ -768,6 +878,7 @@
         let transactions = []; // Array to store all transactions
         let monthlyBudget = 0; // User's monthly budget for 'Wants'
         let storedPIN = null; // Stored PIN from localStorage
+        let securityAnswers = null; // Stored security answers from localStorage
         let recurringTransactions = []; // Array to store recurring transaction schedules
         let customCategories = []; // Array to store user-defined custom categories
         let savingsGoal = 0; // User's total savings goal amount
@@ -873,6 +984,33 @@
             } catch (error) {
                 console.error('Error clearing PIN from localStorage:', error);
                 showMessage('Failed to clear PIN.', 'error');
+            }
+        };
+
+        const saveSecurityAnswers = (answers) => {
+            try {
+                localStorage.setItem('securityAnswers', JSON.stringify(answers));
+                securityAnswers = answers;
+                console.log("[DEBUG SECURITY] Security answers saved:", answers);
+            } catch (error) {
+                console.error('Error saving security answers to localStorage:', error);
+                showMessage('Failed to save security answers. Please try again.', 'error');
+            }
+        };
+
+        const loadSecurityAnswers = () => {
+            try {
+                const storedAnswers = localStorage.getItem('securityAnswers');
+                if (storedAnswers) {
+                    securityAnswers = JSON.parse(storedAnswers);
+                    console.log("[DEBUG SECURITY] Security answers loaded:", securityAnswers);
+                } else {
+                    securityAnswers = null;
+                }
+            } catch (error) {
+                console.error('Error loading security answers from localStorage:', error);
+                showMessage('Failed to load security answers.', 'error');
+                securityAnswers = null;
             }
         };
 
@@ -997,11 +1135,11 @@
                             selectElement.appendChild(option);
                         });
                     }
-                    // For entry/recurring, ensure "Select Detailed Category" is the first option
+                    // For entry/recurring, ensure "Select Category" is the first option
                     if (selectElement.id === 'entryDetailedCategory' || selectElement.id === 'recurringDetailedCategory') {
                         const defaultOption = document.createElement('option');
                         defaultOption.value = '';
-                        defaultOption.textContent = 'Select Detailed Category';
+                        defaultOption.textContent = 'Select Category'; // Renamed from "Select Detailed Category"
                         selectElement.appendChild(defaultOption);
                     }
 
@@ -1346,17 +1484,32 @@
                 let currentMonthCommittedNeeds = 0;
                 recurringTransactions.forEach(rec => {
                     const nextDue = new Date(rec.nextDueDate);
+                    // Only consider if the scheduled payment is due in the current month or is overdue from previous months
+                    // and has not been marked as paid for this cycle yet
                     if (rec.expenseType === 'Need' &&
-                        nextDue.getMonth() === currentMonth &&
-                        nextDue.getFullYear() === currentYear) {
-                        currentMonthCommittedNeeds += rec.amount;
+                        (nextDue.getMonth() === currentMonth && nextDue.getFullYear() === currentYear || nextDue < today)) {
+                        // Check if a transaction for this specific recurring item and month already exists.
+                        // This prevents counting the same "need" if it was already automatically processed or manually marked.
+                        const isAlreadyRecorded = transactions.some(t =>
+                            t.type === 'Expense' &&
+                            t.expenseType === 'Need' &&
+                            t.detailedCategory === rec.detailedCategory &&
+                            t.amount === rec.amount &&
+                            new Date(t.date).getMonth() === currentMonth &&
+                            new Date(t.date).getFullYear() === currentYear &&
+                            t.note.includes('Recurring: ') // To filter out manually added "Needs" that are not recurring
+                        );
+                        if (!isAlreadyRecorded) { // Only add to sum if not yet recorded as an actual transaction
+                             currentMonthCommittedNeeds += rec.amount;
+                        }
                     }
                 });
+
 
                 // Update the committed needs display element
                 committedNeedsDisplayEl.textContent = `₹${currentMonthCommittedNeeds.toLocaleString('en-IN')}`;
 
-                let feedbackEmoji = '🤔';
+                let feedbackEmoji = '�';
                 let feedbackText = '';
 
                 // Initial feedback based on budget
@@ -1364,14 +1517,14 @@
                     const wantsPercentage = (currentMonthWants / monthlyBudget) * 100;
 
                     if (wantsPercentage >= 100) {
-                        feedbackEmoji = '�';
+                        feedbackEmoji = '😱';
                         feedbackText = `🚨 Over budget on wants by ₹${(currentMonthWants - monthlyBudget).toLocaleString('en-IN')}!`;
                     } else if (wantsPercentage >= 85) {
                         feedbackEmoji = '😬';
                         feedbackText = `⚠️ You’ve spent ${wantsPercentage.toFixed(0)}% of your wants budget!`;
                     } else if (wantsPercentage >= 50) {
                         feedbackEmoji = '👍';
-                        feedbackText = 'On track with wants! Used ${wantsPercentage.toFixed(0)}% of budget.';
+                        feedbackText = `On track with wants! Used ${wantsPercentage.toFixed(0)}% of budget.`;
                     } else {
                         feedbackEmoji = '😇';
                         feedbackText = 'Great spending on wants!';
@@ -1417,20 +1570,27 @@
                 if (savingsGoal > 0) {
                     const percentage = (currentSavingsProgress / savingsGoal) * 100;
                     savingsProgressDisplay.textContent = `₹${currentSavingsProgress.toLocaleString('en-IN')} / ₹${savingsGoal.toLocaleString('en-IN')}`;
+                    
+                    // Apply animation class to trigger refill animation if progress changes significantly
                     savingsProgressBar.style.width = `${Math.min(100, percentage).toFixed(0)}%`;
-                    savingsProgressBar.classList.remove('bg-red-600');
+                    savingsProgressBar.classList.remove('bg-red-600', 'bg-blue-600', 'bg-yellow-500'); // Remove old colors
+                    savingsProgressBar.classList.add('animate-progressBarFill'); // Add animation
+
                     if (percentage >= 100) {
                         savingsProgressBar.classList.add('bg-green-600');
                         showMessage('Congratulations! You\'ve reached your savings goal!', 'success');
                     } else if (percentage >= 75) {
                         savingsProgressBar.classList.add('bg-blue-600');
-                    } else {
+                    } else if (percentage >= 50) {
                         savingsProgressBar.classList.add('bg-yellow-500');
+                    } else {
+                        savingsProgressBar.classList.add('bg-red-600'); // If less than 50%, maybe red for warning
                     }
                 } else {
                     savingsProgressDisplay.textContent = `₹0.00 / ₹0.00`;
                     savingsProgressBar.style.width = '0%';
                     savingsProgressBar.classList.remove('bg-green-600', 'bg-blue-600', 'bg-yellow-500', 'bg-red-600');
+                    savingsProgressBar.classList.remove('animate-progressBarFill'); // Remove animation if no goal
                 }
             } catch (error) {
                 console.error('Error updating savings goal display:', error);
@@ -1544,7 +1704,7 @@
                     const expenseType = entryExpenseType.value;
                     const detailedCategory = entryDetailedCategory.value;
                     if (!expenseType || !detailedCategory) {
-                        showMessage('Please select both Expense Type and Detailed Category for expenses.', 'error');
+                        showMessage('Please select both Expense Classification and Category for expenses.', 'error');
                         return;
                     }
                     newTransaction = {
@@ -1574,6 +1734,8 @@
                 updateUI();
                 hideModal(entryModal, modalContent);
                 showMessage('Entry added successfully!', 'success');
+                entryForm.reset(); // Clear the form
+                toggleExpenseCategoryFields(); // Reset visibility
             } catch (error) {
                 console.error('Error adding new entry:', error);
                 showMessage('Failed to add new entry. Please check your inputs.', 'error');
@@ -1718,17 +1880,22 @@
                     today.setHours(0, 0, 0, 0); // Normalize today's date to start of day for accurate comparison
 
                     let timeUntilDue = '';
+                    let statusColorClass = '';
                     const diffTime = nextDue.getTime() - today.getTime();
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Calculate days remaining
 
                     if (diffDays === 0) {
                         timeUntilDue = 'Due Today!';
+                        statusColorClass = 'text-orange-600 font-semibold';
                     } else if (diffDays === 1) {
                         timeUntilDue = 'Due Tomorrow';
+                        statusColorClass = 'text-yellow-600';
                     } else if (diffDays > 1) {
                         timeUntilDue = `${diffDays} days left`;
+                        statusColorClass = 'text-purple-700';
                     } else {
                         timeUntilDue = `${Math.abs(diffDays)} days overdue!`; // If negative, it's overdue
+                        statusColorClass = 'text-red-600 font-semibold';
                     }
 
                     const recEl = document.createElement('div');
@@ -1737,7 +1904,7 @@
                         <div class="flex-grow min-w-0">
                             <p class="font-semibold text-base truncate">₹${rec.amount.toLocaleString('en-IN')} - ${rec.detailedCategory} (${rec.expenseType})</p>
                             <p class="text-xs text-gray-600">Starts: ${new Date(rec.startDate).toLocaleDateString()} | Every: ${rec.recurrenceInterval}</p>
-                            <p class="text-xs text-gray-600">Next Due: ${new Date(rec.nextDueDate).toLocaleDateString()} <span class="font-bold text-purple-700">(${timeUntilDue})</span></p>
+                            <p class="text-xs text-gray-600">Next Due: ${new Date(rec.nextDueDate).toLocaleDateString()} <span class="${statusColorClass}">(${timeUntilDue})</span></p>
                         </div>
                         <div class="flex items-center gap-1 flex-shrink-0">
                             <button data-id="${rec.id}" class="mark-paid-btn bg-purple-500 hover:bg-purple-600 text-white font-semibold py-1 px-2.5 rounded-lg shadow-md transition duration-200 ease-in-out text-xs">
@@ -1756,12 +1923,16 @@
                     button.onclick = (e) => {
                         try {
                             const idToDelete = e.target.dataset.id;
-                            recurringTransactions = recurringTransactions.filter(rec => rec.id !== idToDelete);
-                            saveRecurringTransactions();
-                            renderRecurringList(); // Update the main page recurring list
-                            renderCommittedNeedsDetailList(); // Also update committed needs modal if open
-                            updateUI(); // Update the main UI (including committed needs total)
-                            showMessage('Recurring entry deleted!', 'success');
+                            showCustomConfirm('Are you sure you want to delete this scheduled entry?', () => {
+                                recurringTransactions = recurringTransactions.filter(rec => rec.id !== idToDelete);
+                                saveRecurringTransactions();
+                                renderRecurringList(); // Update the main page recurring list
+                                renderCommittedNeedsDetailList(); // Also update committed needs modal if open
+                                updateUI(); // Update the main UI (including committed needs total)
+                                showMessage('Scheduled entry deleted!', 'success');
+                            }, () => {
+                                showMessage('Deletion cancelled.', 'info');
+                            });
                         } catch (error) {
                             console.error('Error deleting recurring entry:', error);
                             showMessage('Failed to delete recurring entry.', 'error');
@@ -1864,6 +2035,7 @@
                 showMessage('Recurring entry scheduled!', 'success');
                 
                 hideModal(recurringEntryModal, recurringModalContent);
+                recurringEntryForm.reset(); // Clear the form
             } catch (error) {
                 console.error('Error scheduling recurring entry:', error);
                 showMessage('Failed to schedule recurring entry.', 'error');
@@ -1891,7 +2063,8 @@
                             t.amount === rec.amount &&
                             t.detailedCategory === rec.detailedCategory &&
                             t.expenseType === rec.expenseType &&
-                            t.date === nextDue.toISOString().substring(0, 10)
+                            t.date === nextDue.toISOString().substring(0, 10) &&
+                            t.note.includes('Recurring: ') // Ensure it's a recurring transaction, not a manual one
                         );
 
                         if (!isDuplicate) {
@@ -1903,7 +2076,7 @@
                                 expenseType: rec.expenseType,
                                 detailedCategory: rec.detailedCategory,
                                 date: nextDue.toISOString().substring(0, 10),
-                                note: `Recurring: ${rec.detailedCategory} (${rec.recurrenceInterval})`
+                                note: `Recurring: ${rec.detailedCategory}`
                             };
                             transactions.push(newTransaction);
                             transactionsAdded = true;
@@ -1935,8 +2108,8 @@
         };
 
         /**
-         * SECTION: Committed Needs Detail Modal Logic
-         * Handles the display and actions within the committed needs detail modal.
+         * SECTION: Scheduled Bills Details Modal Logic
+         * Handles the display and actions within the scheduled bills detail modal.
          */
 
         /**
@@ -1952,12 +2125,11 @@
                 const currentMonthCommittedNeeds = recurringTransactions.filter(rec => {
                     const nextDue = new Date(rec.nextDueDate);
                     return rec.expenseType === 'Need' &&
-                           nextDue.getMonth() === currentMonth &&
-                           nextDue.getFullYear() === currentYear;
+                           (nextDue.getMonth() === currentMonth && nextDue.getFullYear() === currentYear || nextDue < today); // Include overdue
                 }).sort((a, b) => new Date(a.nextDueDate) - new Date(b.nextDueDate)); // Sort by due date
 
                 if (currentMonthCommittedNeeds.length === 0) {
-                    committedNeedsDetailList.innerHTML = '<p class="text-center text-blue-500 italic text-sm">No committed needs scheduled for this month.</p>';
+                    committedNeedsDetailList.innerHTML = '<p class="text-center text-blue-500 italic text-sm">No scheduled bills for this month.</p>';
                     return;
                 }
 
@@ -1966,31 +2138,48 @@
                     today.setHours(0, 0, 0, 0);
 
                     let timeUntilDue = '';
+                    let statusColorClass = '';
                     const diffTime = nextDue.getTime() - today.getTime();
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
                     if (diffDays === 0) {
                         timeUntilDue = 'Due Today!';
+                        statusColorClass = 'text-orange-600 font-semibold';
                     } else if (diffDays === 1) {
                         timeUntilDue = 'Due Tomorrow';
+                        statusColorClass = 'text-yellow-600';
                     } else if (diffDays > 1) {
                         timeUntilDue = `${diffDays} days left`;
+                        statusColorClass = 'text-blue-700';
                     } else {
                         timeUntilDue = `${Math.abs(diffDays)} days overdue!`;
+                        statusColorClass = 'text-red-600 font-semibold';
                     }
+
+                    // Check if this recurring item for this specific due date has already been recorded as a transaction
+                    const isRecorded = transactions.some(t =>
+                        t.type === 'Expense' &&
+                        t.amount === rec.amount &&
+                        t.detailedCategory === rec.detailedCategory &&
+                        t.expenseType === rec.expenseType &&
+                        new Date(t.date).toISOString().substring(0, 10) === new Date(rec.nextDueDate).toISOString().substring(0, 10) &&
+                        t.note.includes('Recurring: ')
+                    );
 
                     const recEl = document.createElement('div');
                     recEl.className = `flex justify-between items-center p-2 rounded-lg shadow-sm border bg-blue-100/60 border-blue-300 text-blue-800 glass-effect`;
                     recEl.innerHTML = `
                         <div class="flex-grow min-w-0">
                             <p class="font-semibold text-base truncate">₹${rec.amount.toLocaleString('en-IN')} - ${rec.detailedCategory}</p>
-                            <p class="text-xs text-gray-600">Next Due: ${nextDue.toLocaleDateString()} <span class="font-bold text-blue-700">(${timeUntilDue})</span></p>
+                            <p class="text-xs text-gray-600">Next Due: ${nextDue.toLocaleDateString()} <span class="${statusColorClass}">(${timeUntilDue})</span></p>
                         </div>
                         <div class="flex items-center gap-1 flex-shrink-0">
-                            <button data-id="${rec.id}" class="mark-paid-from-detail-btn bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-2.5 rounded-lg shadow-md transition duration-200 ease-in-out text-xs">
-                                Mark Paid
-                            </button>
-                            <button data-id="${rec.id}" class="delete-recurring-btn text-gray-500 hover:text-red-600 text-base p-0.5 rounded-full hover:bg-gray-200 transition-colors">
+                            ${!isRecorded ? `
+                                <button data-id="${rec.id}" class="mark-paid-from-detail-btn bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-2.5 rounded-lg shadow-md transition duration-200 ease-in-out text-xs">
+                                    Mark Paid
+                                </button>
+                            ` : `<span class="text-green-600 font-semibold text-xs">Paid ✅</span>`}
+                            <button data-id="${rec.id}" class="delete-recurring-from-detail-btn text-gray-500 hover:text-red-600 text-base p-0.5 rounded-full hover:bg-gray-200 transition-colors">
                                 &times;
                             </button>
                         </div>
@@ -2040,7 +2229,7 @@
                                 renderCommittedNeedsDetailList();
                                 renderRecurringList();
                                 updateUI();
-                                showMessage('Recurring entry marked as paid!', 'success');
+                                showMessage('Scheduled bill marked as paid!', 'success');
                             }
                         } catch (error) {
                             console.error('Error marking committed need as paid:', error);
@@ -2050,16 +2239,20 @@
                 });
 
                 // Attach event listeners for delete buttons in this modal
-                document.querySelectorAll('#committedNeedsDetailList .delete-recurring-btn').forEach(button => {
+                document.querySelectorAll('#committedNeedsDetailList .delete-recurring-from-detail-btn').forEach(button => {
                     button.onclick = (e) => {
                         try {
                             const idToDelete = e.target.dataset.id;
-                            recurringTransactions = recurringTransactions.filter(rec => rec.id !== idToDelete);
-                            saveRecurringTransactions();
-                            renderCommittedNeedsDetailList();
-                            renderRecurringList();
-                            updateUI();
-                            showMessage('Recurring entry deleted!', 'success');
+                            showCustomConfirm('Are you sure you want to delete this scheduled entry?', () => {
+                                recurringTransactions = recurringTransactions.filter(rec => rec.id !== idToDelete);
+                                saveRecurringTransactions();
+                                renderCommittedNeedsDetailList();
+                                renderRecurringList();
+                                updateUI();
+                                showMessage('Scheduled entry deleted!', 'success');
+                            }, () => {
+                                showMessage('Deletion cancelled.', 'info');
+                            });
                         } catch (error) {
                             console.error('Error deleting committed need:', error);
                             showMessage('Failed to delete committed need.', 'error');
@@ -2068,7 +2261,7 @@
                 });
             } catch (error) {
                 console.error('Error rendering committed needs detail list:', error);
-                showMessage('Failed to display committed needs details.', 'error');
+                showMessage('Failed to display scheduled bills details.', 'error');
             }
         };
 
@@ -2114,7 +2307,6 @@
          */
         let unlockSessionActive = sessionStorage.getItem('unlockSessionActive') === 'true';
         let hasAgreedToDisclaimer = localStorage.getItem('hasAgreedToDisclaimer') === 'true'; // New state variable
-        let onboardingComplete = localStorage.getItem('onboardingComplete') === 'true'; // New state variable
 
         /**
          * Shows a generic modal with a smooth transition.
@@ -2144,43 +2336,34 @@
 
 
         /**
-         * Shows the privacy lock modal (Step 4 / Regular Lock).
+         * Shows the privacy lock modal (Step 5 / Regular Lock).
          */
         const showLockModal = () => {
             try {
-                console.log("[DEBUG ONBOARDING] showLockModal called. onboardingComplete:", onboardingComplete, "unlockSessionActive:", unlockSessionActive);
+                console.log("[DEBUG ONBOARDING] showLockModal called. storedPIN:", storedPIN, "unlockSessionActive:", unlockSessionActive);
 
-                if (unlockSessionActive && storedPIN) { // Added storedPIN check here for robustness
+                if (unlockSessionActive && storedPIN) {
                     console.log("[DEBUG ONBOARDING] Session active and PIN exists. Skipping lock modal, showing main content.");
                     mainAppContent.classList.remove('hidden');
                     initializeApp();
                     return;
                 }
                 
-                // Onboarding flow logic
-                if (!storedPIN) { // If NO PIN is stored, it means user is in onboarding or reset app
+                // Determine which buttons to show based on PIN existence
+                if (!storedPIN) { // If NO PIN is stored, this is the first time setting it
                     console.log("[DEBUG ONBOARDING] No stored PIN. User needs to set it.");
-                    if (!hasAgreedToDisclaimer) {
-                        console.log("[DEBUG ONBOARDING] Disclaimer not agreed. Showing disclaimer modal.");
-                        // Step 3: Show disclaimer if not agreed
-                        showGenericModal(disclaimerModal, disclaimerModalContent);
-                        return;
-                    }
-                    console.log("[DEBUG ONBOARDING] Disclaimer agreed. Ready for PIN setup (first time).");
-                    // This is the first time setting a PIN
                     lockModalTitle.textContent = '🔑 Set Your PIN';
                     unlockBtn.textContent = 'Set PIN';
-                    setNewPinBtn.classList.add('hidden'); // Hide set new pin for first time
-                    resetPinBtn.classList.add('hidden'); // Hide reset for first time
-                    forgotPinBtn.classList.add('hidden'); // Hide forgot for first time
+                    setNewPinBtn.classList.add('hidden');
+                    forgotPinBtn.classList.add('hidden');
+                    resetAllDataBtn.classList.add('hidden');
                 } else {
                     console.log("[DEBUG ONBOARDING] Stored PIN found. Regular login flow.");
-                    // Regular login flow (PIN is already set)
                     lockModalTitle.textContent = '🔒 Enter PIN';
                     unlockBtn.textContent = 'Unlock';
                     setNewPinBtn.classList.remove('hidden');
-                    resetPinBtn.classList.remove('hidden');
-                    forgotPinBtn.classList.remove('hidden'); 
+                    forgotPinBtn.classList.remove('hidden');
+                    resetAllDataBtn.classList.remove('hidden');
                 }
 
                 showGenericModal(privacyLockModal, lockModalContent);
@@ -2273,7 +2456,6 @@
                 pinError.textContent = '';
 
                 console.log("[DEBUG UNLOCK] Attempting unlock. Entered PIN:", enteredPIN, "Stored PIN:", storedPIN);
-                console.log("[DEBUG UNLOCK] Onboarding Complete (before setting):", onboardingComplete);
 
 
                 if (lockoutEndTime > Date.now()) {
@@ -2282,17 +2464,15 @@
                     return;
                 }
 
-                if (!storedPIN) { // No PIN set yet, this is for setting the PIN (Step 4)
+                if (!storedPIN) { // No PIN set yet, this is for setting the PIN (Initial Setup from onboarding)
                     if (enteredPIN.length === 4 && /^\d+$/.test(enteredPIN)) {
                         savePIN(enteredPIN);
-                        localStorage.setItem('onboardingComplete', 'true'); // Mark onboarding as complete (redundant with storedPIN check but good for explicit state)
-                        onboardingComplete = true; // Update in-memory state
                         sessionStorage.setItem('unlockSessionActive', 'true');
-                        console.log("[DEBUG UNLOCK] PIN set for the first time. onboardingComplete set to 'true'.");
+                        console.log("[DEBUG UNLOCK] Initial PIN set successfully.");
                         hideLockModal();
                         mainAppContent.classList.remove('hidden');
                         initializeApp();
-                        showMessage('PIN set successfully!', 'success');
+                        showMessage('PIN set successfully! You are now secured.', 'success');
                         failedAttempts = 0;
                         localStorage.setItem('failedAttempts', failedAttempts);
                         startIdleTimer();
@@ -2309,7 +2489,7 @@
                         initializeApp();
                         showMessage('App unlocked!', 'success');
                         failedAttempts = 0;
-                        localStorage.setItem('failedAttempts', failedAttempts); // Fixed typo here
+                        localStorage.setItem('failedAttempts', failedAttempts);
                         startIdleTimer();
                     } else {
                         failedAttempts++;
@@ -2342,51 +2522,165 @@
             hasAgreedToDisclaimer = true; // Update in-memory state
             console.log("[DEBUG ONBOARDING] Disclaimer agreed. hasAgreedToDisclaimer set to 'true'.");
             hideGenericModal(disclaimerModal, disclaimerModalContent);
-            showLockModal(); // Now proceed to PIN setup (Step 4)
+            showModal(setSecurityQuestionsModal, setSecurityQuestionsModalContent); // Proceed to setting security questions
+            nicknameInput.focus();
         };
 
+        /**
+         * Handles saving security questions during onboarding (Step 4).
+         */
+        const handleSaveSecurityQuestions = () => {
+            securityQuestionsError.classList.add('hidden');
+            securityQuestionsError.textContent = '';
+
+            const nickname = nicknameInput.value.trim();
+            const petName = petNameInput.value.trim();
+
+            if (!nickname || !petName) {
+                securityQuestionsError.textContent = 'Please fill both security questions.';
+                securityQuestionsError.classList.remove('hidden');
+                return;
+            }
+
+            saveSecurityAnswers({ nickname: nickname.toLowerCase(), petName: petName.toLowerCase() }); // Store in lowercase for case-insensitive matching
+            
+            hideModal(setSecurityQuestionsModal, setSecurityQuestionsModalContent);
+            showLockModal(); // Now proceed to PIN setup (Step 5, which is the privacyLockModal)
+            showMessage('Security questions saved!', 'success');
+            // Clear inputs
+            nicknameInput.value = '';
+            petNameInput.value = '';
+        };
 
         /**
-         * Prompts the user to set a new PIN, with validation.
+         * Handles the "Forgot PIN" action.
+         */
+        const handleForgotPin = () => {
+            resetIdleTimer();
+            if (securityAnswers) {
+                // Show security questions prompt
+                showModal(securityQuestionsPromptModal, securityQuestionsPromptModalContent);
+                recoveryNicknameInput.value = '';
+                recoveryPetNameInput.value = '';
+                recoveryError.classList.add('hidden');
+                recoveryNicknameInput.focus();
+            } else {
+                // No security answers set, inform user they must reset all data
+                showCustomConfirm(
+                    'No security questions found. You must reset all app data to set a new PIN. This action is irreversible and will delete all your transactions. Proceed?',
+                    () => {
+                        clearAllAppData(); // Call the full reset function
+                        showMessage('App reset. All data cleared!', 'success');
+                        location.reload();
+                    },
+                    () => {
+                        showMessage('PIN recovery cancelled. No data deleted.', 'info');
+                    }
+                );
+            }
+        };
+
+        /**
+         * Handles submission of security answers for PIN recovery.
+         */
+        const handleSubmitRecoveryAnswers = () => {
+            recoveryError.classList.add('hidden');
+            recoveryError.textContent = '';
+
+            const enteredNickname = recoveryNicknameInput.value.trim().toLowerCase();
+            const enteredPetName = recoveryPetNameInput.value.trim().toLowerCase();
+
+            if (!enteredNickname && !enteredPetName) { // Check if BOTH are empty
+                recoveryError.textContent = 'Please answer at least one question.';
+                recoveryError.classList.remove('hidden');
+                return;
+            }
+
+            // Updated logic: Check if EITHER nickname OR pet name is correct
+            const isNicknameCorrect = enteredNickname === securityAnswers.nickname;
+            const isPetNameCorrect = enteredPetName === securityAnswers.petName;
+
+            if (isNicknameCorrect || isPetNameCorrect) {
+                hideModal(securityQuestionsPromptModal, securityQuestionsPromptModalContent);
+                showModal(newPinRecoveryModal, newPinRecoveryModalContent);
+                newPinInputRecovery.value = '';
+                confirmNewPinInputRecovery.value = '';
+                newPinRecoveryError.classList.add('hidden');
+                newPinInputRecovery.focus();
+                showMessage('Security questions answered correctly! Set your new PIN.', 'success');
+            } else {
+                recoveryError.textContent = 'Incorrect answers. Please try again.';
+                recoveryError.classList.remove('hidden');
+                showMessage('Incorrect security answers. Data is safe but PIN cannot be recovered this way.', 'error');
+            }
+        };
+
+        /**
+         * Handles saving the new PIN after successful security question recovery.
+         */
+        const handleSaveNewPinRecovery = () => {
+            newPinRecoveryError.classList.add('hidden');
+            newPinRecoveryError.textContent = '';
+
+            const newPin = newPinInputRecovery.value;
+            const confirmPin = confirmNewPinInputRecovery.value;
+
+            if (newPin.length !== 4 || !/^\d+$/.test(newPin)) {
+                newPinRecoveryError.textContent = 'New PIN must be 4 digits.';
+                newPinRecoveryError.classList.remove('hidden');
+                return;
+            }
+            if (newPin !== confirmPin) {
+                newPinRecoveryError.textContent = 'New PINs do not match.';
+                newPinRecoveryError.classList.remove('hidden');
+                return;
+            }
+
+            savePIN(newPin); // This updates storedPIN in localStorage
+            sessionStorage.setItem('unlockSessionActive', 'true'); // Automatically unlock session
+            hideModal(newPinRecoveryModal, newPinRecoveryModalContent);
+            hideLockModal(); // Hide the main lock modal too
+            mainAppContent.classList.remove('hidden');
+            initializeApp(); // Re-initialize app to ensure everything is updated
+            showMessage('New PIN set successfully! App unlocked.', 'success');
+            // Clear inputs
+            newPinInputRecovery.value = '';
+            confirmNewPinInputRecovery.value = '';
+        };
+
+        /**
+         * Handles setting a new PIN when the user knows their current PIN.
          */
         const handleSetNewPin = () => {
             try {
                 resetIdleTimer();
-                let newPin = null;
-
-                const currentPinCheck = prompt('Enter your CURRENT 4-digit PIN:');
-                if (currentPinCheck === null) {
+                // This is specifically for changing PIN when the user knows their current PIN.
+                // It will prompt for current PIN, then new PIN.
+                // For recovery (forgotten PIN), the 'Forgot PIN' button will be used.
+                
+                showCustomInput('Enter your CURRENT 4-digit PIN:', 'password', '••••', (currentPinCheck) => {
+                    if (currentPinCheck !== storedPIN) {
+                        showMessage('Incorrect current PIN.', 'error');
+                        return;
+                    }
+                    showCustomInput('Enter NEW 4-digit PIN:', 'password', '••••', (newPin) => {
+                        if (newPin.length !== 4 || !/^\d+$/.test(newPin)) {
+                            showMessage('New PIN must be exactly 4 digits.', 'error');
+                            return;
+                        }
+                        showCustomInput('Confirm NEW 4-digit PIN:', 'password', '••••', (confirmPin) => {
+                            if (newPin === confirmPin) {
+                                savePIN(newPin);
+                                showMessage('New PIN set successfully!', 'success');
+                            } else {
+                                showMessage('New PINs do not match. Please try again.', 'error');
+                            }
+                        });
+                    });
+                }, () => {
                     showMessage('PIN change cancelled.', 'info');
-                    return;
-                }
-                if (currentPinCheck !== storedPIN) {
-                    showMessage('Incorrect current PIN.', 'error');
-                    return;
-                }
-                newPin = prompt('Enter NEW 4-digit PIN:');
+                });
 
-                if (newPin === null) {
-                    showMessage('PIN change cancelled.', 'info');
-                    return;
-                }
-
-                if (newPin.length !== 4 || !/^\d+$/.test(newPin)) {
-                    showMessage('New PIN must be exactly 4 digits.', 'error');
-                    return;
-                }
-
-                const confirmPin = prompt('Confirm NEW 4-digit PIN:');
-                if (confirmPin === null) {
-                    showMessage('PIN change cancelled.', 'info');
-                    return;
-                }
-
-                if (newPin === confirmPin) {
-                    savePIN(newPin);
-                    showMessage('New PIN set successfully!', 'success');
-                } else {
-                    showMessage('New PINs do not match. Please try again.', 'error');
-                }
             } catch (error) {
                 console.error('Error setting new PIN:', error);
                 showMessage('Failed to set new PIN.', 'error');
@@ -2394,29 +2688,36 @@
         };
 
         /**
-         * Resets the application by clearing all data and PIN.
+         * Clears all app data and resets the PIN. This is a full reset.
          */
-        const handleResetApp = () => {
+        const clearAllAppData = () => {
+            clearPIN();
+            localStorage.clear(); // Clear all app data
+            sessionStorage.removeItem('unlockSessionActive');
+            // Explicitly remove critical flags as localStorage.clear() might be too broad for some edge cases
+            localStorage.removeItem('hasAgreedToDisclaimer');
+            localStorage.removeItem('securityAnswers'); // Ensure security answers are also cleared
+
+            transactions = [];
+            monthlyBudget = 0;
+            customCategories = [];
+            savingsGoal = 0;
+            currentSavingsProgress = 0;
+            recurringTransactions = [];
+            failedAttempts = 0;
+            localStorage.removeItem('failedAttempts');
+            localStorage.removeItem('lockoutEndTime');
+            updateUI();
+        };
+
+        /**
+         * Handles the "Reset All Data" action, which clears everything.
+         */
+        const handleResetAllData = () => { // Renamed from handleResetApp to reflect its purpose clearly
             try {
                 resetIdleTimer();
-                // Using a custom message box instead of confirm()
-                showCustomConfirm('WARNING: This will clear your PIN and ALL transaction data. Are you sure? This is an irreversible action.', () => {
-                    clearPIN();
-                    localStorage.clear(); // Clear all app data
-                    sessionStorage.removeItem('unlockSessionActive');
-                    localStorage.removeItem('hasAgreedToDisclaimer'); // Also reset disclaimer flag
-                    localStorage.removeItem('onboardingComplete'); // Reset onboarding flag
-                    console.log("[DEBUG RESET] All data cleared, onboarding and disclaimer flags reset.");
-                    transactions = [];
-                    monthlyBudget = 0;
-                    customCategories = [];
-                    savingsGoal = 0;
-                    currentSavingsProgress = 0;
-                    recurringTransactions = [];
-                    failedAttempts = 0;
-                    localStorage.removeItem('failedAttempts');
-                    localStorage.removeItem('lockoutEndTime');
-                    updateUI();
+                showCustomConfirm('WARNING: This will clear your PIN, all security questions, and ALL transaction data. Are you sure? This action is irreversible.', () => {
+                    clearAllAppData();
                     showMessage('App and PIN reset. All data cleared!', 'success');
                     location.reload(); // Reload to ensure a clean state
                 }, () => {
@@ -2425,41 +2726,6 @@
             } catch (error) {
                 console.error('Error resetting app:', error);
                 showMessage('Failed to reset application data.', 'error');
-            }
-        };
-
-        /**
-         * Handles the "Forgot PIN" action, which also resets all data.
-         */
-        const handleForgotPin = () => {
-            try {
-                resetIdleTimer();
-                // Using a custom message box instead of confirm()
-                showCustomConfirm('WARNING: Forgetting your PIN will clear ALL your transaction data and reset the app. This action cannot be undone. Are you sure you want to proceed?', () => {
-                    clearPIN();
-                    localStorage.clear();
-                    sessionStorage.removeItem('unlockSessionActive');
-                    localStorage.removeItem('hasAgreedToDisclaimer'); // Also reset disclaimer flag
-                    localStorage.removeItem('onboardingComplete'); // Reset onboarding flag
-                    console.log("[DEBUG FORGOT] All data cleared due to forgot PIN, onboarding and disclaimer flags reset.");
-                    transactions = [];
-                    monthlyBudget = 0;
-                    customCategories = [];
-                    savingsGoal = 0;
-                    currentSavingsProgress = 0;
-                    recurringTransactions = [];
-                    failedAttempts = 0;
-                    localStorage.removeItem('failedAttempts');
-                    localStorage.removeItem('lockoutEndTime');
-                    updateUI();
-                    showMessage('PIN forgotten and app reset. All data cleared!', 'success');
-                    location.reload();
-                }, () => {
-                    showMessage('Forgot PIN cancelled.', 'info');
-                });
-            } catch (error) {
-                console.error('Error handling forgot PIN:', error);
-                showMessage('Failed to process "Forgot PIN" request.', 'error');
             }
         };
 
@@ -2531,6 +2797,55 @@
         }
 
         /**
+         * Custom input dialog implementation.
+         * Used for prompts like entering old PIN or new PIN.
+         */
+        function showCustomInput(message, inputType = 'text', placeholder = '', onSubmit, onCancel = () => {}) {
+            const inputModal = document.createElement('div');
+            inputModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9998]';
+            inputModal.innerHTML = `
+                <div class="modal-glass-effect rounded-2xl shadow-xl p-6 w-full max-w-sm text-center">
+                    <p class="text-xl font-semibold text-gray-800 mb-6">${message}</p>
+                    <input type="${inputType}" id="customInput" placeholder="${placeholder}"
+                           class="w-full p-3 sm:p-4 text-center text-lg rounded-lg border-2 border-indigo-300 focus:ring-4 focus:ring-indigo-400 focus:border-transparent font-mono text-indigo-800 bg-white/60 mb-4">
+                    <p id="customInputError" class="text-red-500 text-sm mb-4 hidden"></p>
+                    <div class="flex justify-center gap-4">
+                        <button id="customInputSubmit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition">Submit</button>
+                        <button id="customInputCancel" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg shadow-md transition">Cancel</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(inputModal);
+            const inputEl = document.getElementById('customInput');
+            const errorEl = document.getElementById('customInputError');
+
+            const handleSubmit = () => {
+                const value = inputEl.value.trim();
+                if (inputType === 'password') { // Additional validation for PIN type input
+                    if (value.length !== 4 || !/^\d+$/.test(value)) {
+                        errorEl.textContent = 'PIN must be 4 digits.';
+                        errorEl.classList.remove('hidden');
+                        return;
+                    }
+                }
+                document.body.removeChild(inputModal);
+                onSubmit(value);
+            };
+
+            document.getElementById('customInputSubmit').onclick = handleSubmit;
+            document.getElementById('customInputCancel').onclick = () => {
+                document.body.removeChild(inputModal);
+                onCancel();
+            };
+            inputEl.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleSubmit();
+                }
+            });
+            inputEl.focus();
+        }
+
+        /**
          * SECTION: Data Export Functions
          * Handles exporting transaction data to CSV and PDF formats.
          */
@@ -2592,64 +2907,89 @@
          * Exports transaction data to a PDF file.
          */
         const exportToPDF = async () => {
+            let pdfContentContainer = null;
+            let temporaryPreviewDiv = null;
             try {
-                // Hide the main application content temporarily to avoid capturing it directly
-                mainAppContent.classList.add('hidden');
+                showMessage('Preparing PDF content...', 'info');
 
-                // Create a temporary div to render the PDF content with specific styles for PDF
-                const tempDiv = document.createElement('div');
-                tempDiv.className = "bg-white p-4 rounded-lg shadow-xl mx-auto w-full max-w-4xl border border-indigo-100";
-                document.body.appendChild(tempDiv);
+                // Create an off-screen container for HTML2Canvas to capture
+                pdfContentContainer = document.createElement('div');
+                pdfContentContainer.style.position = 'absolute';
+                pdfContentContainer.style.left = '-9999px'; // Position off-screen
+                pdfContentContainer.style.width = '210mm'; // A4 width for consistent rendering
+                pdfContentContainer.style.padding = '10mm'; // Add some padding
+                pdfContentContainer.style.backgroundColor = 'white'; // Background for the PDF
+                document.body.appendChild(pdfContentContainer);
 
-                // Populate the temporary div with content, adjusting font sizes
-                tempDiv.innerHTML = `
-                    <div class="p-2">
-                        <h1 class="text-xl sm:text-2xl font-bold text-center text-indigo-700 mb-4 border-b border-indigo-200 pb-2">
-                            Income-Expense Report
+                // Build the content for the PDF in the off-screen container
+                pdfContentContainer.innerHTML = `
+                    <div style="font-family: 'Inter', sans-serif; color: #1f2937;">
+                        <h1 style="font-size: 24px; font-weight: bold; text-align: center; color: #4F46E5; margin-bottom: 8px;">
+                            EveXa Income-Expense Report
                         </h1>
-                        <div id="pdf-summary" class="grid grid-cols-2 gap-2 mb-4">
-                            <div class="bg-gradient-to-r from-green-500 to-green-600 text-white p-3 rounded-lg shadow-md text-center">
-                                <p class="text-xs uppercase opacity-90">Total Income</p>
-                                <p class="text-xl font-bold">${totalIncomeEl.textContent}</p>
+                        <p style="font-size: 14px; text-align: center; color: #4B5563; margin-bottom: 20px;">by EveXa Buddy</p>
+
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px;">
+                            <div style="background-color: #34D399; color: white; padding: 12px; border-radius: 8px; text-align: center;">
+                                <p style="font-size: 12px; text-transform: uppercase; opacity: 0.9;">Total Income</p>
+                                <p style="font-size: 20px; font-weight: bold;">${totalIncomeEl.textContent}</p>
                             </div>
-                            <div class="bg-gradient-to-r from-red-500 to-red-600 text-white p-3 rounded-lg shadow-md text-center">
-                                <p class="text-xs uppercase opacity-90">Total Expense</p>
-                                <p class="text-xl font-bold">${totalExpenseEl.textContent}</p>
+                            <div style="background-color: #EF4444; color: white; padding: 12px; border-radius: 8px; text-align: center;">
+                                <p style="font-size: 12px; text-transform: uppercase; opacity: 0.9;">Total Expense</p>
+                                <p style="font-size: 20px; font-weight: bold;">${totalExpenseEl.textContent}</p>
                             </div>
-                            <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 rounded-lg shadow-md text-center">
-                                <p class="text-xs uppercase opacity-90">Balance</p>
-                                <p class="text-xl font-bold">${balanceEl.textContent}</p>
+                            <div style="background-color: #3B82F6; color: white; padding: 12px; border-radius: 8px; text-align: center;">
+                                <p style="font-size: 12px; text-transform: uppercase; opacity: 0.9;">Balance</p>
+                                <p style="font-size: 20px; font-weight: bold;">${balanceEl.textContent}</p>
                             </div>
-                            <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-3 rounded-lg shadow-md text-center">
-                                <p class="text-xs uppercase opacity-90">Savings</p>
-                                <p class="text-xl font-bold">${totalSavingsEl.textContent}</p>
+                            <div style="background-color: #8B5CF6; color: white; padding: 12px; border-radius: 8px; text-align: center;">
+                                <p style="font-size: 12px; text-transform: uppercase; opacity: 0.9;">Savings</p>
+                                <p style="font-size: 20px; font-weight: bold;">₹${currentSavingsProgress.toLocaleString('en-IN')}</p>
                             </div>
                         </div>
-                        <div id="pdf-feedback" class="bg-indigo-50 p-4 rounded-lg shadow-inner mb-4 text-center border border-indigo-200">
-                            <p class="text-xl mb-1">${feedbackEmojiEl.textContent}</p>
-                            <p class="text-base font-medium">${feedbackTextEl.textContent}</p>
+
+                        <div style="background-color: #EEF2FF; padding: 16px; border-radius: 8px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); margin-bottom: 20px; text-align: center;">
+                            <p style="font-size: 20px; margin-bottom: 4px;">${feedbackEmojiEl.textContent}</p>
+                            <p style="font-size: 14px; font-weight: 500; color: #4F46E5;">${feedbackTextEl.textContent}</p>
                         </div>
-                        <h2 class="text-xl font-semibold text-indigo-700 mb-3 border-b border-indigo-200 pb-1">Transactions for ${filterMonthEl.value || 'All Months'} (${filterDetailedCategoryEl.value || 'All Categories'})</h2>
-                        <div id="pdf-transaction-list" class="space-y-2 text-sm">
+
+                        <h2 style="font-size: 20px; font-weight: 600; color: #4F46E5; margin-bottom: 12px; padding-bottom: 4px; border-bottom: 1px solid #E0E7FF;">
+                            Transactions for ${filterMonthEl.value || 'All Months'} (${filterDetailedCategoryEl.value || 'All Categories'})
+                        </h2>
+                        <div id="pdf-transaction-list" style="margin-bottom: 20px;">
                             ${Array.from(transactionListEl.children).map(node => {
-                                // Clone and adjust styles for PDF
                                 const clonedNode = node.cloneNode(true);
-                                clonedNode.classList.remove('p-3', 'text-lg', 'text-xl'); // Remove existing size classes
-                                clonedNode.classList.add('p-2', 'text-sm'); // Add smaller size classes for PDF
-                                clonedNode.querySelector('.font-semibold.text-lg')?.classList.replace('text-lg', 'text-base'); // Adjust note/category font
-                                clonedNode.querySelector('.font-bold.text-xl')?.classList.replace('text-xl', 'text-lg'); // Adjust amount font
-                                clonedNode.querySelector('.text-sm.text-gray-600')?.classList.replace('text-sm', 'text-xs'); // Adjust date font
-                                return clonedNode.outerHTML;
+                                // Adjusting classes for PDF rendering
+                                clonedNode.classList.remove('p-2', 'text-sm');
+                                clonedNode.classList.add('p-1.5', 'text-xs'); // Smaller for PDF
+                                // Adjusting font sizes within the cloned node
+                                const amountSpan = clonedNode.querySelector('.font-bold.text-lg');
+                                if (amountSpan) {
+                                    amountSpan.classList.remove('text-lg');
+                                    amountSpan.classList.add('text-sm');
+                                }
+                                const descriptionP = clonedNode.querySelector('.font-semibold.text-base');
+                                if (descriptionP) {
+                                    descriptionP.classList.remove('text-base');
+                                    descriptionP.classList.add('text-sm');
+                                }
+                                // Remove delete buttons from PDF
+                                const deleteButton = clonedNode.querySelector('.delete-btn');
+                                if (deleteButton) deleteButton.remove();
+                                return `<div style="display: flex; justify-content: space-between; align-items: center; padding: 6px; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #E0E7FF; margin-bottom: 4px; ${clonedNode.style.cssText}">${clonedNode.innerHTML}</div>`;
                             }).join('')}
                         </div>
-                        <h2 class="text-xl font-semibold text-indigo-700 mt-6 mb-3 border-b border-indigo-200 pb-1 text-center">Spending Breakdown (Current Month)</h2>
-                        <div id="pdf-chart-container" class="relative w-full max-w-sm mx-auto aspect-square"></div>
+                        
+                        <h2 style="font-size: 20px; font-weight: 600; color: #4F46E5; margin-top: 24px; margin-bottom: 12px; padding-bottom: 4px; border-bottom: 1px solid #E0E7FF; text-align: center;">
+                            Spending Breakdown (Current Month)
+                        </h2>
+                        <div id="pdf-chart-container" style="width: 150mm; height: 150mm; margin: 0 auto;"></div>
                     </div>
                 `;
 
                 // Append chart image to the temporary div
                 const chartCanvas = document.getElementById('spendingChart');
-                if (chartCanvas && chartCanvas.chart) {
+                if (chartCanvas && spendingChart) {
                     const chartImg = document.createElement('img');
                     chartImg.src = chartCanvas.toDataURL('image/png');
                     chartImg.style.width = '100%';
@@ -2658,27 +2998,51 @@
                 } else {
                     const chartStatus = document.createElement('p');
                     chartStatus.textContent = 'No chart data available for PDF.';
-                    chartStatus.className = 'text-center text-indigo-500 italic mt-4';
+                    chartStatus.style.textAlign = 'center';
+                    chartStatus.style.color = '#6B7280';
+                    chartStatus.style.fontStyle = 'italic';
+                    chartStatus.style.marginTop = '16px';
                     document.getElementById('pdf-chart-container').appendChild(chartStatus);
                 }
 
-                showMessage('Generating PDF...', 'info');
+                // Create a temporary div for on-screen preview (non-interactive, just visual)
+                temporaryPreviewDiv = document.createElement('div');
+                temporaryPreviewDiv.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[1000]";
+                temporaryPreviewDiv.style.transition = 'opacity 0.5s ease-out'; // For fading out
+                temporaryPreviewDiv.style.opacity = '1'; // Start visible
+                temporaryPreviewDiv.style.pointerEvents = 'none'; // Make it non-interactive
+                temporaryPreviewDiv.innerHTML = `
+                    <div class="modal-glass-effect rounded-2xl shadow-xl p-4 w-full max-w-lg" style="max-height: 80vh; overflow-y: auto;">
+                        <h3 class="text-xl font-bold text-center text-indigo-700 mb-4">PDF Preview</h3>
+                        <div id="livePdfPreviewContent" style="width: 100%; height: auto;"></div>
+                    </div>
+                `;
+                document.body.appendChild(temporaryPreviewDiv);
 
-                const element = tempDiv;
-                const { jsPDF } = window.jspdf;
-
-                const canvas = await html2canvas(element, {
-                    scale: 2,
+                // Render the off-screen container to a canvas
+                const canvas = await html2canvas(pdfContentContainer, {
+                    scale: 2, // Increase scale for higher resolution in PDF
                     useCORS: true,
                     logging: false,
-                    windowWidth: tempDiv.scrollWidth,
-                    windowHeight: tempDiv.scrollHeight,
+                    windowWidth: pdfContentContainer.scrollWidth,
+                    windowHeight: pdfContentContainer.scrollHeight,
                 });
 
+                // Display the captured image in the temporary preview div
+                const previewImg = document.createElement('img');
+                previewImg.src = canvas.toDataURL('image/png');
+                previewImg.style.width = '100%';
+                previewImg.style.height = 'auto';
+                document.getElementById('livePdfPreviewContent').appendChild(previewImg);
+
+
+                showMessage('Generating PDF...', 'info');
+
+                const { jsPDF } = window.jspdf;
                 const imgData = canvas.toDataURL('image/png');
                 const pdf = new jsPDF('p', 'mm', 'a4');
-                const imgWidth = 210;
-                const pageHeight = 297;
+                const imgWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
                 const imgHeight = (canvas.height * imgWidth) / canvas.width;
                 let heightLeft = imgHeight;
                 let position = 0;
@@ -2693,8 +3057,23 @@
                     heightLeft -= pageHeight;
                 }
 
+                // Add EveXa branding and page numbering
+                const totalPages = pdf.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    pdf.setPage(i);
+                    pdf.setFontSize(10);
+                    // Header: EveXa Branding
+                    pdf.text('EveXa', pdf.internal.pageSize.getWidth() / 2, 10, { align: 'center' });
+                    // Footer: Page Numbering
+                    const footerText = `EveXa Income - Expense Report | Page no ${i}`;
+                    const textWidth = pdf.getStringUnitWidth(footerText) * pdf.internal.getFontSize() / pdf.internal.scaleFactor;
+                    const centerX = (pdf.internal.pageSize.getWidth() - textWidth) / 2;
+                    const y = pdf.internal.pageSize.getHeight() - 10; // 10mm from bottom
+                    pdf.text(footerText, centerX, y);
+                }
+
                 const selectedMonth = filterMonthEl.value;
-                const fileName = `expense_report_${selectedMonth || 'all'}.pdf`;
+                const fileName = `EveXa_Income_Expense_Report_${selectedMonth || 'All'}.pdf`;
                 pdf.save(fileName);
                 showMessage('PDF exported successfully!', 'success');
 
@@ -2702,13 +3081,24 @@
                 console.error('Error generating PDF:', error);
                 showMessage('Error generating PDF. Please try again.', 'error');
             } finally {
-                // Restore main content display and remove temporary div
-                mainAppContent.classList.remove('hidden');
-                if (document.body.contains(tempDiv)) {
-                    document.body.removeChild(tempDiv);
+                // Clean up the off-screen container
+                if (pdfContentContainer && document.body.contains(pdfContentContainer)) {
+                    document.body.removeChild(pdfContentContainer);
+                }
+                // Auto-hide the temporary preview div after a few seconds
+                if (temporaryPreviewDiv && document.body.contains(temporaryPreviewDiv)) {
+                    setTimeout(() => {
+                        temporaryPreviewDiv.style.opacity = '0';
+                        temporaryPreviewDiv.addEventListener('transitionend', () => {
+                            if (document.body.contains(temporaryPreviewDiv)) {
+                                document.body.removeChild(temporaryPreviewDiv);
+                            }
+                        }, { once: true });
+                    }, 3000); // Preview visible for 3 seconds before fading out
                 }
             }
         };
+
 
         /**
          * SECTION: Carousel Logic
@@ -2788,6 +3178,7 @@
                 loadRecurringTransactions();
                 loadCustomCategories(); // Load custom categories
                 loadSavingsGoal(); // Load savings goal
+                loadSecurityAnswers(); // Load security answers
 
                 // Process recurring entries before rendering anything
                 processRecurringEntries();
@@ -2837,7 +3228,7 @@
             }
         });
         setNewPinBtn.onclick = handleSetNewPin;
-        resetPinBtn.onclick = handleResetApp;
+        resetAllDataBtn.onclick = handleResetAllData; // Changed
         forgotPinBtn.onclick = handleForgotPin;
         
         // Onboarding Step Buttons
@@ -2847,9 +3238,17 @@
         };
         generatePinBtn.onclick = () => {
             hideGenericModal(generatePinPromptModal, generatePinPromptModalContent);
-            showLockModal(); // This will trigger the disclaimer if not agreed, or PIN setup directly
+            showGenericModal(disclaimerModal, disclaimerModalContent); // Changed: Disclaimer comes after "Generate PIN" prompt
         };
-        agreeToDisclaimerBtn.onclick = handleAgreeToDisclaimer; // This now leads to showLockModal (PIN setup)
+        agreeToDisclaimerBtn.onclick = handleAgreeToDisclaimer; // Leads to setting security questions
+
+        // Security Questions setup
+        saveSecurityQuestionsBtn.onclick = handleSaveSecurityQuestions;
+
+        // PIN Recovery via security questions
+        submitRecoveryAnswersBtn.onclick = handleSubmitRecoveryAnswers;
+        cancelRecoveryBtn.onclick = () => hideModal(securityQuestionsPromptModal, securityQuestionsPromptModalContent);
+        saveNewPinRecoveryBtn.onclick = handleSaveNewPinRecovery;
 
         addCustomCategoryBtn.onclick = handleAddCustomCategory;
         setSavingsGoalBtn.onclick = handleSetSavingsGoal;
@@ -2866,14 +3265,13 @@
          */
         window.onload = () => {
             loadPIN(); // Try to load stored PIN
-            hasAgreedToDisclaimer = localStorage.getItem('hasAgreedToDisclaimer') === 'true'; // Re-load disclaimer status
-            // The onboardingComplete flag is now secondary, storedPIN is primary for determining onboarding status
-            // onboardingComplete = localStorage.getItem('onboardingComplete') === 'true'; // Keeping for debugging, but won't drive primary decision
+            loadSecurityAnswers(); // Load security answers
+            let hasAgreedToDisclaimer = localStorage.getItem('hasAgreedToDisclaimer') === 'true'; // Re-load disclaimer status
 
             console.log("[DEBUG ONBOARDING] Window loaded. Initial states:");
             console.log("  storedPIN:", storedPIN); // This is the key state
+            console.log("  securityAnswers:", securityAnswers); // Check if security answers exist
             console.log("  hasAgreedToDisclaimer:", hasAgreedToDisclaimer);
-            // console.log("  onboardingComplete (from localStorage):", onboardingComplete); // For debugging
             console.log("  unlockSessionActive (sessionStorage):", unlockSessionActive);
 
 
@@ -2883,9 +3281,9 @@
                 appLoader.style.opacity = '0'; // Fade out loader
                 appLoader.addEventListener('transitionend', () => {
                     appLoader.classList.add('hidden');
-                    // Check if a PIN is stored. If yes, the user has gone through onboarding (or reset app and is back to PIN).
-                    if (storedPIN) { // <--- THIS IS THE CRITICAL CHANGE: Use storedPIN as primary check
-                        console.log("[DEBUG ONBOARDING] Stored PIN found. User is past initial onboarding steps. Initializing app and showing lock screen if session is not active.");
+                    // Determine onboarding state
+                    if (storedPIN) { // User has a PIN, meaning initial setup is done
+                        console.log("[DEBUG ONBOARDING] Stored PIN found. User is past initial setup. Initializing app and showing lock screen if session is not active.");
                         mainAppContent.classList.remove('hidden'); // Ensure main content is prepared
                         initializeApp(); // Fully initialize the app
                         if (!unlockSessionActive) {
@@ -2895,10 +3293,20 @@
                             console.log("[DEBUG ONBOARDING] Session active. Skipping lock modal. Starting idle timer.");
                             startIdleTimer(); // App is already unlocked from a previous action in this session
                         }
-                    } else {
-                        // No PIN stored. User is genuinely new or explicitly reset the app. Start full onboarding flow.
-                        console.log("[DEBUG ONBOARDING] No stored PIN. User needs to complete onboarding. Showing welcome modal.");
+                    } else if (hasAgreedToDisclaimer && !securityAnswers) {
+                        // User has agreed to disclaimer but not set security questions or PIN (unlikely but possible edge case)
+                        console.log("[DEBUG ONBOARDING] Disclaimer agreed, but no security answers or PIN. Directing to security questions setup.");
+                        showModal(setSecurityQuestionsModal, setSecurityQuestionsModalContent);
+                        nicknameInput.focus();
+                    } else if (!hasAgreedToDisclaimer) {
+                        // User is completely new or cleared data completely. Start full onboarding flow.
+                        console.log("[DEBUG ONBOARDING] No stored PIN or disclaimer. Starting full onboarding flow with welcome modal.");
                         showGenericModal(welcomeModal, welcomeModalContent);
+                    } else {
+                        // This case handles a scenario where security answers might exist but PIN is not set,
+                        // or other inconsistent states. Guide to PIN setup if security answers are there.
+                        console.log("[DEBUG ONBOARDING] Security answers found, but PIN not set. Directing to PIN setup.");
+                        showLockModal(); // This will default to "Set Your PIN" mode
                     }
                 }, { once: true });
             }, 500); // Loader displays for 0.5 seconds
